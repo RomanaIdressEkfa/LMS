@@ -47,7 +47,7 @@ class RbacSeeder extends Seeder
             'dashboard.view', 'users.view', 'users.create', 'users.update',
             'roles.view', 'courses.view', 'courses.approve', 'courses.publish',
             'enrollments.view', 'payments.view', 'gateways.view', 'modules.view',
-            'settings.view', 'reports.view',
+            'settings.view', 'settings.manage', 'reports.view',
         ]],
         'teacher'      => ['label' => 'Teacher',       'permissions' => [
             'dashboard.view', 'courses.view', 'courses.create', 'courses.update',
