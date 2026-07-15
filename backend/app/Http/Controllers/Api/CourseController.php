@@ -112,6 +112,9 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         $course->load(['lessons', 'category:id,name,color']);
+        // Owner-only view: expose the uploaded-video URL so the editor can show
+        // that a video is attached (the accessor isn't serialized by default).
+        $course->lessons->each->append('video_file_url');
 
         return response()->json(['course' => $course]);
     }
