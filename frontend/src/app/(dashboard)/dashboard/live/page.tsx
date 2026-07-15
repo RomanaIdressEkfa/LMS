@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiGet, apiPost, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useLang } from "@/lib/i18n";
 
 interface LiveSession {
   id: number;
@@ -26,6 +27,7 @@ const STATUS: Record<string, string> = {
 
 export default function LivePage() {
   const { can } = useAuth();
+  const { t } = useLang();
   const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -65,18 +67,18 @@ export default function LivePage() {
   const fmt = (iso: string) =>
     new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-  if (loading) return <p className="text-[var(--muted)]">Loading sessions…</p>;
+  if (loading) return <p className="text-[var(--muted)]">{t("common.loading")}</p>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl">Live Classes</h1>
-          <p className="mt-1 text-[var(--muted)]">Join live sessions or watch for what&apos;s coming up.</p>
+          <h1 className="text-3xl">{t("live.title")}</h1>
+          <p className="mt-1 text-[var(--muted)]">{t("live.sub")}</p>
         </div>
         {canHost && (
           <button onClick={() => setShowForm((s) => !s)} className="btn-primary">
-            {showForm ? "Close" : "+ Schedule Session"}
+            {showForm ? t("live.close") : t("live.schedule")}
           </button>
         )}
       </div>
@@ -105,7 +107,7 @@ export default function LivePage() {
       {sessions.length === 0 ? (
         <div className="card grid place-items-center p-12 text-center">
           <span className="text-4xl">🎥</span>
-          <p className="mt-3 font-bold">No upcoming live sessions.</p>
+          <p className="mt-3 font-bold">{t("live.empty")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -114,7 +116,7 @@ export default function LivePage() {
               <div className="flex items-start justify-between gap-2">
                 <h3 className="text-lg leading-tight">{s.title}</h3>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${STATUS[s.status]}`}>
-                  {s.status === "live" ? "🔴 Live" : s.status}
+                  {s.status === "live" ? `🔴 ${t("live.badgeLive")}` : s.status === "scheduled" ? t("live.scheduled") : s.status}
                 </span>
               </div>
               {s.description && <p className="mt-2 flex-1 text-sm text-[var(--muted)]">{s.description}</p>}
@@ -127,16 +129,16 @@ export default function LivePage() {
               <div className="mt-4 flex flex-wrap gap-2">
                 {s.status === "live" && s.meeting_url && (
                   <a href={s.meeting_url} target="_blank" rel="noopener noreferrer" className="btn-primary flex-1 text-center">
-                    Join now →
+                    {t("live.join")} →
                   </a>
                 )}
                 {s.status === "scheduled" && !s.is_host && (
-                  <span className="text-sm font-bold text-[var(--muted)]">Link opens when the session goes live</span>
+                  <span className="text-sm font-bold text-[var(--muted)]">{t("live.opensWhenLive")}</span>
                 )}
                 {s.is_host && (
                   <div className="flex gap-2">
-                    {s.status !== "live" && <button onClick={() => setStatus(s, "live")} className="btn-primary">Go live</button>}
-                    {s.status === "live" && <button onClick={() => setStatus(s, "ended")} className="btn-ghost">End</button>}
+                    {s.status !== "live" && <button onClick={() => setStatus(s, "live")} className="btn-primary">{t("live.goLive")}</button>}
+                    {s.status === "live" && <button onClick={() => setStatus(s, "ended")} className="btn-ghost">{t("live.end")}</button>}
                   </div>
                 )}
               </div>

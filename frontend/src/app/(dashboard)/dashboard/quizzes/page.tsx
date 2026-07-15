@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiGet, apiPost } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { useLang } from "@/lib/i18n";
 
 interface Quiz {
   id: number;
@@ -20,6 +21,7 @@ interface Quiz {
 
 export default function QuizzesPage() {
   const { can } = useAuth();
+  const { t } = useLang();
   const router = useRouter();
   const [available, setAvailable] = useState<Quiz[]>([]);
   const [mine, setMine] = useState<Quiz[]>([]);
@@ -48,36 +50,36 @@ export default function QuizzesPage() {
     router.push(`/dashboard/quizzes/${quiz.id}/edit`);
   }
 
-  if (loading) return <p className="text-[var(--muted)]">Loading quizzes…</p>;
+  if (loading) return <p className="text-[var(--muted)]">{t("common.loading")}</p>;
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl">Quizzes</h1>
-          <p className="mt-1 text-[var(--muted)]">Test your knowledge and earn passing scores.</p>
+          <h1 className="text-3xl">{t("quiz.title")}</h1>
+          <p className="mt-1 text-[var(--muted)]">{t("quiz.sub")}</p>
         </div>
-        {canCreate && <button onClick={createQuiz} className="btn-primary">+ New Quiz</button>}
+        {canCreate && <button onClick={createQuiz} className="btn-primary">{t("quiz.new")}</button>}
       </div>
 
       {/* Teacher's own quizzes */}
       {canCreate && (
         <section>
-          <h2 className="text-xl">My quizzes</h2>
+          <h2 className="text-xl">{t("quiz.mine")}</h2>
           {mine.length === 0 ? (
-            <p className="mt-2 text-sm text-[var(--muted)]">You haven&apos;t created any quizzes yet.</p>
+            <p className="mt-2 text-sm text-[var(--muted)]">{t("quiz.mineEmpty")}</p>
           ) : (
             <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {mine.map((q) => (
                 <Link key={q.id} href={`/dashboard/quizzes/${q.id}/edit`} className="card p-5 transition-transform hover:-translate-y-1">
                   <div className="flex items-center justify-between">
                     <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${q.published ? "bg-[var(--success)]/15 text-[var(--success)]" : "bg-[var(--warning)]/15 text-[var(--warning)]"}`}>
-                      {q.published ? "published" : "draft"}
+                      {q.published ? t("quiz.published") : t("quiz.draft")}
                     </span>
-                    <span className="text-xs text-[var(--muted)]">{q.attempts_count ?? 0} attempts</span>
+                    <span className="text-xs text-[var(--muted)]">{q.attempts_count ?? 0} {t("quiz.attempts")}</span>
                   </div>
                   <h3 className="mt-3 text-lg">{q.title}</h3>
-                  <p className="mt-1 text-sm text-[var(--muted)]">{q.questions_count} questions · pass {q.pass_mark}%</p>
+                  <p className="mt-1 text-sm text-[var(--muted)]">{q.questions_count} {t("quiz.questions")} · {t("quiz.pass")} {q.pass_mark}%</p>
                 </Link>
               ))}
             </div>
@@ -87,11 +89,11 @@ export default function QuizzesPage() {
 
       {/* Available to take */}
       <section>
-        <h2 className="text-xl">Available quizzes</h2>
+        <h2 className="text-xl">{t("quiz.available")}</h2>
         {available.length === 0 ? (
           <div className="card mt-3 grid place-items-center p-12 text-center">
             <span className="text-4xl">📝</span>
-            <p className="mt-3 font-bold">No published quizzes yet.</p>
+            <p className="mt-3 font-bold">{t("quiz.availEmpty")}</p>
           </div>
         ) : (
           <div className="mt-3 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -100,15 +102,15 @@ export default function QuizzesPage() {
                 <h3 className="text-lg">{q.title}</h3>
                 {q.description && <p className="mt-1 flex-1 text-sm text-[var(--muted)]">{q.description}</p>}
                 <div className="mt-3 flex items-center justify-between text-xs text-[var(--muted)]">
-                  <span>{q.questions_count} questions · pass {q.pass_mark}%</span>
+                  <span>{q.questions_count} {t("quiz.questions")} · {t("quiz.pass")} {q.pass_mark}%</span>
                   {q.best_score != null && (
                     <span className={`font-bold ${q.best_score >= q.pass_mark ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
-                      Best: {q.best_score}%
+                      {t("quiz.best")}: {q.best_score}%
                     </span>
                   )}
                 </div>
                 <Link href={`/dashboard/quizzes/${q.id}`} className="btn-primary mt-4 text-center">
-                  {q.best_score != null ? "Retake" : "Start quiz"}
+                  {q.best_score != null ? t("quiz.retake") : t("quiz.start")}
                 </Link>
               </div>
             ))}

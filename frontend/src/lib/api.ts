@@ -57,6 +57,28 @@ export async function api<T = unknown>(
   return data as T;
 }
 
+/** Multipart upload (files). Does NOT set Content-Type so the browser adds the boundary. */
+export async function apiUpload<T = unknown>(path: string, formData: FormData): Promise<T> {
+  const token = getToken();
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new ApiError(
+      (data as { message?: string }).message ?? "Upload failed",
+      res.status,
+      (data as { errors?: Record<string, string[]> }).errors
+    );
+  }
+  return data as T;
+}
+
 export const apiGet = <T = unknown>(path: string) => api<T>(path);
 export const apiPost = <T = unknown>(path: string, body?: unknown) =>
   api<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });

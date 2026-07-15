@@ -60,16 +60,40 @@ class CourseController extends Controller
         $owner = $user && $course->teacher_id === $user->id;
         $canViewAll = $enrolled || $owner;
 
-        $lessons = $course->lessons->map(fn ($l) => [
-            'id' => $l->id,
-            'title' => $l->title,
-            'type' => $l->type,
-            'duration_minutes' => $l->duration_minutes,
-            'is_preview' => $l->is_preview,
-            'locked' => ! ($canViewAll || $l->is_preview),
-            'video_url' => ($canViewAll || $l->is_preview) ? $l->video_url : null,
-            'content' => ($canViewAll || $l->is_preview) ? $l->content : null,
-        ]);
+        // Which lessons has this user completed? (drives the sequential unlock)
+        $completedIds = $user
+            ? \App\Models\LessonProgress::where('user_id', $user->id)
+                ->where('course_id', $course->id)->pluck('lesson_id')->all()
+            : [];
+
+        // Sequential unlock: a lesson is unlocked if it's the first, the previous
+        // one is completed, the viewer owns the course, or it's a free preview.
+        $prevCompleted = true; // first lesson starts unlocked
+        $lessons = $course->lessons->values()->map(function ($l) use ($canViewAll, $owner, $completedIds, &$prevCompleted) {
+            $completed = in_array($l->id, $completedIds, true);
+            $unlocked = $owner || $l->is_preview || ($canViewAll && $prevCompleted);
+            $accessible = $unlocked; // may show content
+            $row = [
+                'id' => $l->id,
+                'title' => $l->title,
+                'type' => $l->type,
+                'duration_minutes' => $l->duration_minutes,
+                'is_preview' => $l->is_preview,
+                'locked' => ! $accessible,
+                'unlocked' => $unlocked,
+                'completed' => $completed,
+                'has_question' => ! empty($l->question),
+                'video_url' => $accessible ? $l->video_url : null,
+                'video_file_url' => $accessible ? $l->video_file_url : null,
+                'content' => $accessible ? $l->content : null,
+                // Question WITHOUT the correct answer (never leak it to the client).
+                'question' => ($accessible && $l->question) ? $l->question : null,
+                'question_options' => ($accessible && $l->question) ? $l->question_options : null,
+            ];
+            // Next lesson unlocks only once this one is completed.
+            $prevCompleted = $completed;
+            return $row;
+        });
 
         return response()->json([
             'course' => array_merge($course->toArray(), [

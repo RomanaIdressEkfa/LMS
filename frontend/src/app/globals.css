@@ -52,7 +52,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-sans: var(--font-sans), var(--font-bn), system-ui, sans-serif;
   --radius-brand: var(--radius);
 }
 
@@ -175,3 +175,39 @@ h2 { font-size: clamp(1.25rem, 1rem + 0.8vw, 1.6rem); }
   font-size: 0.78rem;
   font-weight: 700;
 }
+
+/* ---- Programming-Hero style helpers ---- */
+.grad-ph      { background: linear-gradient(135deg, #a020f0, #6d28d9); }        /* purple */
+.grad-magenta { background: linear-gradient(135deg, #d61f9a, #a020f0); }        /* pink→purple */
+.gradient-ph-text {
+  background: linear-gradient(100deg, #a020f0, #d61f9a);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Soft pastel card backgrounds */
+.pastel-purple { background: #f4ecfe; }
+.pastel-blue   { background: #eaf1ff; }
+.pastel-green  { background: #e9fbf1; }
+.pastel-pink   { background: #fdeaf4; }
+.pastel-amber  { background: #fff5e6; }
+.pastel-cyan   { background: #e6f9fc; }
+
+/* Highlight a word inside a headline (PH puts a colored pill behind key words) */
+.hl { border-radius: 0.55rem; padding: 0.05em 0.4em; display: inline-block; line-height: 1.15; }
+.hl-purple { background: #ecd9ff; color: #7c3aed; }
+.hl-pink   { background: #ffd6ea; color: #d61f9a; }
+.hl-amber  { background: #ffe7b8; color: #b45309; }
+
+/* Decorative blurred gradient blobs behind the hero */
+.blob { position: absolute; border-radius: 999px; filter: blur(70px); opacity: 0.55; pointer-events: none; }
+
+/* FAQ accordion */
+details.faq { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+details.faq > summary {
+  cursor: pointer; list-style: none; padding: 1.1rem 1.25rem;
+  font-weight: 800; display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+}
+details.faq > summary::-webkit-details-marker { display: none; }
+details.faq > summary::after { content: "+"; font-size: 1.4rem; color: var(--primary); transition: transform 0.2s; }
+details.faq[open] > summary::after { content: "−"; }
+details.faq > div { padding: 0 1.25rem 1.2rem; color: var(--muted); font-weight: 600; }

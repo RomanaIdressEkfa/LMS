@@ -37,6 +37,9 @@ Route::get('/courses/{slug}', [CourseController::class, 'show']);
 Route::get('/instructors', [\App\Http\Controllers\Api\PublicController::class, 'instructors']);
 Route::get('/pricing', [\App\Http\Controllers\Api\PublicController::class, 'pricing']);
 
+// Public editable marketing content (home/about/pricing/instructors/contact).
+Route::get('/content', [\App\Http\Controllers\Api\SiteContentController::class, 'show']);
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated routes (Sanctum bearer token)
@@ -74,6 +77,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])
         ->middleware('permission:settings.view');
     Route::put('/settings', [SettingsController::class, 'update'])
+        ->middleware('permission:settings.manage');
+    Route::post('/settings/logo', [SettingsController::class, 'uploadLogo'])
+        ->middleware('permission:settings.manage');
+    Route::delete('/settings/logo', [SettingsController::class, 'removeLogo'])
+        ->middleware('permission:settings.manage');
+
+    // ---- Editable marketing content (public pages) ----
+    Route::put('/content', [\App\Http\Controllers\Api\SiteContentController::class, 'update'])
+        ->middleware('permission:settings.manage');
+    Route::put('/content/text', [\App\Http\Controllers\Api\SiteContentController::class, 'saveText'])
         ->middleware('permission:settings.manage');
 
     // ---- Platform: reselling plans (super admin) ----
@@ -129,6 +142,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store']);
     Route::get('/courses/{course}/progress', [ProgressController::class, 'index']);
     Route::post('/courses/{course}/lessons/{lesson}/progress', [ProgressController::class, 'toggle']);
+    // Answer a lesson's quiz question to complete it and unlock the next.
+    Route::post('/courses/{course}/lessons/{lesson}/answer', [ProgressController::class, 'answer']);
 
     // ---- Teaching (instructors) ----
     Route::get('/my/courses', [CourseController::class, 'mine'])
@@ -152,6 +167,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/courses/{course}/lessons/{lesson}', [LessonController::class, 'destroy'])
         ->middleware('permission:lessons.delete');
     Route::post('/courses/{course}/lessons/reorder', [LessonController::class, 'reorder'])
+        ->middleware('permission:lessons.update');
+    Route::post('/courses/{course}/lessons/{lesson}/video', [LessonController::class, 'uploadVideo'])
         ->middleware('permission:lessons.update');
 
     // ---- Live Classes (module: live_classes) ----

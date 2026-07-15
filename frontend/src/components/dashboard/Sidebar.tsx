@@ -4,57 +4,59 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
+import { useLang } from "@/lib/i18n";
 
 /**
  * Nav item. `permission` gates visibility — an item only shows if the user
- * holds that permission (null = always visible). This is how the sidebar
- * adapts per role automatically.
+ * holds that permission (null = always visible). `tkey` is an i18n key so the
+ * sidebar is bilingual.
  */
 interface NavItem {
-  label: string;
+  tkey: string;
   href: string;
   icon: string;
   permission: string | null;
 }
 
 interface NavSection {
-  title: string;
+  tkey: string;
   items: NavItem[];
 }
 
 const NAV: NavSection[] = [
   {
-    title: "Main",
+    tkey: "side.main",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: "🏠", permission: "dashboard.view" },
+      { tkey: "side.dashboard", href: "/dashboard", icon: "🏠", permission: "dashboard.view" },
     ],
   },
   {
-    title: "Education",
+    tkey: "side.education",
     items: [
-      { label: "Course Catalog", href: "/dashboard/courses", icon: "🎓", permission: "courses.view" },
-      { label: "My Learning", href: "/dashboard/learn", icon: "📚", permission: "courses.view" },
-      { label: "My Purchases", href: "/dashboard/purchases", icon: "🧾", permission: "courses.view" },
-      { label: "Teaching", href: "/dashboard/teaching", icon: "✏️", permission: "courses.create" },
-      { label: "Live Classes", href: "/dashboard/live", icon: "🎥", permission: "live.view" },
-      { label: "Quizzes", href: "/dashboard/quizzes", icon: "📝", permission: "quizzes.view" },
+      { tkey: "side.catalog", href: "/dashboard/courses", icon: "🎓", permission: "courses.view" },
+      { tkey: "side.learning", href: "/dashboard/learn", icon: "📚", permission: "courses.view" },
+      { tkey: "side.purchases", href: "/dashboard/purchases", icon: "🧾", permission: "courses.view" },
+      { tkey: "side.teaching", href: "/dashboard/teaching", icon: "✏️", permission: "courses.create" },
+      { tkey: "side.live", href: "/dashboard/live", icon: "🎥", permission: "live.view" },
+      { tkey: "side.quizzes", href: "/dashboard/quizzes", icon: "📝", permission: "quizzes.view" },
     ],
   },
   {
-    title: "Administration",
+    tkey: "side.administration",
     items: [
-      { label: "Users", href: "/dashboard/users", icon: "👥", permission: "users.view" },
-      { label: "Roles & Permissions", href: "/dashboard/roles", icon: "🛡️", permission: "roles.view" },
-      { label: "Modules / Addons", href: "/dashboard/modules", icon: "🧩", permission: "modules.view" },
-      { label: "Payment Gateways", href: "/dashboard/gateways", icon: "💳", permission: "gateways.view" },
-      { label: "Settings", href: "/dashboard/settings", icon: "⚙️", permission: "settings.view" },
+      { tkey: "side.users", href: "/dashboard/users", icon: "👥", permission: "users.view" },
+      { tkey: "side.roles", href: "/dashboard/roles", icon: "🛡️", permission: "roles.view" },
+      { tkey: "side.modules", href: "/dashboard/modules", icon: "🧩", permission: "modules.view" },
+      { tkey: "side.gateways", href: "/dashboard/gateways", icon: "💳", permission: "gateways.view" },
+      { tkey: "side.content", href: "/dashboard/content", icon: "📰", permission: "settings.view" },
+      { tkey: "side.settings", href: "/dashboard/settings", icon: "⚙️", permission: "settings.view" },
     ],
   },
   {
-    title: "Platform",
+    tkey: "side.platform",
     items: [
-      { label: "Tenants", href: "/dashboard/platform/tenants", icon: "🏢", permission: "tenants.view" },
-      { label: "Plans", href: "/dashboard/platform/plans", icon: "💠", permission: "tenants.view" },
+      { tkey: "side.tenants", href: "/dashboard/platform/tenants", icon: "🏢", permission: "tenants.view" },
+      { tkey: "side.plans", href: "/dashboard/platform/plans", icon: "💠", permission: "tenants.view" },
     ],
   },
 ];
@@ -62,6 +64,7 @@ const NAV: NavSection[] = [
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const { user, can } = useAuth();
+  const { t } = useLang();
 
   return (
     <>
@@ -99,9 +102,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             );
             if (items.length === 0) return null;
             return (
-              <div key={section.title}>
+              <div key={section.tkey}>
                 <p className="px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
-                  {section.title}
+                  {t(section.tkey)}
                 </p>
                 <div className="mt-2 space-y-1">
                   {items.map((item) => {
@@ -120,7 +123,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                         }`}
                       >
                         <span className="text-base">{item.icon}</span>
-                        {item.label}
+                        {t(item.tkey)}
                       </Link>
                     );
                   })}

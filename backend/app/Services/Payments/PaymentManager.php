@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Services\Payments\Drivers\BankGateway;
+use App\Services\Payments\Drivers\MobileWalletGateway;
 use App\Services\Payments\Drivers\StripeGateway;
 use App\Services\Payments\Drivers\TestGateway;
 use InvalidArgumentException;
@@ -18,6 +19,10 @@ class PaymentManager
         'test' => TestGateway::class,
         'bank' => BankGateway::class,
         'stripe' => StripeGateway::class,
+        // Bangladeshi mobile wallets (send-money flow)
+        'bkash' => MobileWalletGateway::class,
+        'nagad' => MobileWalletGateway::class,
+        'rocket' => MobileWalletGateway::class,
     ];
 
     public function driver(string $key): PaymentGatewayContract

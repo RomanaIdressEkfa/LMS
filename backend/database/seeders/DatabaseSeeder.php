@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CourseSeeder::class,
             LiveQuizSeeder::class,
             PlanTenantSeeder::class,
+            SiteContentSeeder::class,
         ]);
 
         // Default site settings.

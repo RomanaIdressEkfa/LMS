@@ -91,12 +91,16 @@ class CourseSeeder extends Seeder
                     ['course_id' => $course->id, 'title' => $title],
                     [
                         'type' => 'video',
-                        'content' => 'Lesson notes and resources go here.',
-                        // Neutral sample clip (Blender open movie). Teachers replace with their own.
-                        'video_url' => 'https://www.youtube.com/embed/aqz-KE-bpKQ',
+                        'content' => 'Watch the video, then answer the question to unlock the next lesson.',
+                        // A normal YouTube link — auto-converted to an embed by the model.
+                        'video_url' => 'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
                         'duration_minutes' => 12,
                         'is_preview' => $i === 0, // first lesson is a free preview
                         'sort_order' => $i,
+                        // One quiz question per lesson (unlocks the next on correct answer).
+                        'question' => "What did you learn in \"{$title}\"?",
+                        'question_options' => ['A key concept', 'Nothing at all', 'Only the intro', 'It was skipped'],
+                        'question_correct_index' => 0,
                     ],
                 );
             }

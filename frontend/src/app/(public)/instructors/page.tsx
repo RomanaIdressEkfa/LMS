@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet } from "@/lib/api";
+import { useContent, loc } from "@/lib/content";
+import { useLang } from "@/lib/i18n";
 
 interface Instructor {
   id: number;
@@ -15,6 +17,8 @@ interface Instructor {
 const GRADS = ["grad-primary", "grad-purple", "grad-sunset", "grad-teal"];
 
 export default function InstructorsPage() {
+  const { instructors: content } = useContent();
+  const { lang } = useLang();
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,13 +31,13 @@ export default function InstructorsPage() {
   return (
     <div>
       <section className="grad-hero border-b border-[var(--border)]">
-        <div className="mx-auto max-w-7xl px-5 py-14 md:px-8">
-          <h1 className="text-4xl md:text-5xl">Meet our <span className="gradient-text">instructors</span></h1>
-          <p className="mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">Learn from experts who create and teach real courses.</p>
+        <div className="mx-auto max-w-[1600px] px-5 py-14 md:px-8">
+          <h1 className="text-4xl md:text-5xl">{loc(content.hero.titleA, lang)} <span className="gradient-text">{loc(content.hero.titleHl, lang)}</span></h1>
+          <p className="mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">{loc(content.hero.subtitle, lang)}</p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-5 py-12 md:px-8">
+      <div className="mx-auto max-w-[1600px] px-5 py-12 md:px-8">
         {loading ? (
           <p className="text-[var(--muted)]">Loading instructors…</p>
         ) : instructors.length === 0 ? (
@@ -58,10 +62,10 @@ export default function InstructorsPage() {
 
         <div className="mt-12 card grad-purple flex flex-col items-center gap-4 p-10 text-center text-white sm:flex-row sm:justify-between sm:text-left">
           <div>
-            <h2 className="text-2xl">Want to teach on LMS?</h2>
-            <p className="mt-1 font-semibold text-white/85">Create and sell your own courses to students worldwide.</p>
+            <h2 className="text-2xl">{loc(content.cta.title, lang)}</h2>
+            <p className="mt-1 font-semibold text-white/85">{loc(content.cta.text, lang)}</p>
           </div>
-          <Link href="/register" className="rounded-xl bg-white px-6 py-3 font-bold text-[var(--purple)]">Become an instructor</Link>
+          <Link href="/register" className="rounded-xl bg-white px-6 py-3 font-bold text-[var(--purple)]">{loc(content.cta.button, lang)}</Link>
         </div>
       </div>
     </div>

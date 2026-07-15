@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class LessonController extends Controller
@@ -42,6 +43,33 @@ class LessonController extends Controller
         return response()->json(['message' => 'Lesson deleted.']);
     }
 
+    /**
+     * Upload a video file for a lesson (mp4/webm/mov). Stored on the public
+     * disk and served via /storage. Returns the new file URL.
+     */
+    public function uploadVideo(Request $request, Course $course, Lesson $lesson)
+    {
+        $this->authorize('manageLessons', $course);
+        abort_unless($lesson->course_id === $course->id, 404);
+
+        $request->validate([
+            'video' => ['required', 'file', 'mimetypes:video/mp4,video/webm,video/quicktime,video/x-msvideo', 'max:204800'], // 200MB
+        ]);
+
+        // Replace any previous upload.
+        if ($lesson->video_file) {
+            Storage::disk('public')->delete($lesson->video_file);
+        }
+
+        $path = $request->file('video')->store('lesson-videos', 'public');
+        $lesson->update(['video_file' => $path]);
+
+        return response()->json([
+            'lesson' => $lesson->fresh(),
+            'video_file_url' => $lesson->video_file_url,
+        ]);
+    }
+
     /** Persist a new lesson order (array of lesson ids in the desired order). */
     public function reorder(Request $request, Course $course)
     {
@@ -69,6 +97,11 @@ class LessonController extends Controller
             'attachment' => ['nullable', 'string', 'max:500'],
             'duration_minutes' => ['nullable', 'integer', 'min:0'],
             'is_preview' => ['boolean'],
+            // Optional per-lesson quiz question that unlocks the next lesson.
+            'question' => ['nullable', 'string'],
+            'question_options' => ['nullable', 'array', 'min:2'],
+            'question_options.*' => ['string'],
+            'question_correct_index' => ['nullable', 'integer', 'min:0'],
         ]);
     }
 }

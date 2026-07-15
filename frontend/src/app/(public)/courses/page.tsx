@@ -38,13 +38,13 @@ function CoursesInner() {
     <div>
       {/* header band */}
       <section className="grad-hero border-b border-[var(--border)]">
-        <div className="mx-auto max-w-7xl px-5 py-14 md:px-8">
+        <div className="mx-auto max-w-[1600px] px-5 py-14 md:px-8">
           <h1 className="text-4xl md:text-5xl">Explore <span className="gradient-text">courses</span></h1>
           <p className="mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">Learn from real instructors. Free courses start instantly.</p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-5 py-10 md:px-8">
+      <div className="mx-auto max-w-[1600px] px-5 py-10 md:px-8">
         {/* filters */}
         <div className="card flex flex-wrap items-center gap-3 p-4">
           <input className="input max-w-xs" placeholder="Search courses…" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -72,7 +72,7 @@ function CoursesInner() {
         ) : (
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
-              <Link key={c.id} href="/register" className="card group flex flex-col overflow-hidden transition-transform hover:-translate-y-1">
+              <Link key={c.id} href={`/courses/${c.slug}`} className="card group flex flex-col overflow-hidden transition-transform hover:-translate-y-1">
                 <div className="relative h-44 text-white" style={{ background: c.category ? `linear-gradient(135deg, ${c.category.color}, #7c3aed)` : "linear-gradient(135deg, #2563ff, #7c3aed)" }}>
                   <div className="absolute inset-0 flex items-center justify-center text-5xl">🎓</div>
                   <span className="pill absolute left-3 top-3 bg-black/25 text-white backdrop-blur">{c.level}</span>

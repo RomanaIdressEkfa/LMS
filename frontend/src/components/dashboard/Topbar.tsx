@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import { useLang } from "@/lib/i18n";
 
 export function Topbar({ onMenu }: { onMenu: () => void }) {
   const { user, logout } = useAuth();
+  const { lang, setLang, t } = useLang();
   const router = useRouter();
 
   async function handleLogout() {
@@ -32,6 +34,12 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-3">
+        {/* Language toggle */}
+        <div className="flex items-center rounded-full border border-[var(--border)] p-0.5 text-xs font-bold">
+          <button onClick={() => setLang("en")} className={`rounded-full px-2.5 py-1 transition-colors ${lang === "en" ? "bg-[var(--primary)] text-white" : "text-[var(--muted)]"}`}>EN</button>
+          <button onClick={() => setLang("bn")} className={`rounded-full px-2.5 py-1 transition-colors ${lang === "bn" ? "bg-[var(--primary)] text-white" : "text-[var(--muted)]"}`}>বাংলা</button>
+        </div>
+
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-white">
           {initials}
         </div>
@@ -43,7 +51,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
           onClick={handleLogout}
           className="ml-2 rounded-[var(--radius)] border border-[var(--border)] px-3 py-2 text-sm font-bold text-[var(--foreground)] transition-colors hover:border-[var(--danger)] hover:text-[var(--danger)]"
         >
-          Logout
+          {t("topbar.logout")}
         </button>
       </div>
     </header>

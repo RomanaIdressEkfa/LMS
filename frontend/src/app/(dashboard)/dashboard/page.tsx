@@ -1,27 +1,26 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-
-const STATS = [
-  { label: "Enrolled Courses", value: "11", icon: "🎓", tone: "primary" },
-  { label: "Certificates", value: "2", icon: "🏅", tone: "success" },
-  { label: "Live Sessions", value: "3", icon: "🎥", tone: "warning" },
-  { label: "Wallet Balance", value: "$591", icon: "💰", tone: "primary" },
-];
+import { useLang } from "@/lib/i18n";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { t } = useLang();
+
+  const STATS = [
+    { label: t("dash.stat.courses"), value: "11", icon: "🎓" },
+    { label: t("dash.stat.certs"), value: "2", icon: "🏅" },
+    { label: t("dash.stat.live"), value: "3", icon: "🎥" },
+    { label: t("dash.stat.wallet"), value: "$591", icon: "💰" },
+  ];
 
   return (
     <div className="space-y-8">
       {/* Hero greeting */}
       <div className="card overflow-hidden">
-        <div className="bg-gradient-to-br from-[#2563ff] to-[#1d4ed8] p-8 text-white">
-          <h1 className="text-3xl">Hello, {user?.name} 👋</h1>
-          <p className="mt-2 max-w-lg text-white/80">
-            Welcome to your LMS dashboard. Everything you can see here is
-            controlled by your role&apos;s permissions.
-          </p>
+        <div className="grad-primary p-8 text-white">
+          <h1 className="text-3xl">{t("dash.hello")}, {user?.name} 👋</h1>
+          <p className="mt-2 max-w-lg text-white/80">{t("dash.welcome")}</p>
         </div>
       </div>
 
@@ -42,11 +41,8 @@ export default function DashboardPage() {
 
       {/* Permission inspector — shows the RBAC engine at work */}
       <div className="card p-6">
-        <h2 className="text-xl">Your access</h2>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          These are the permissions your role grants. The sidebar and every page
-          adapt to exactly this list.
-        </p>
+        <h2 className="text-xl">{t("dash.access")}</h2>
+        <p className="mt-1 text-sm text-[var(--muted)]">{t("dash.accessSub")}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {user?.permissions.map((p) => (
             <span

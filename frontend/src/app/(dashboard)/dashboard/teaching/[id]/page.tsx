@@ -2,10 +2,13 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { apiGet, apiPost, apiPut, apiDelete, ApiError } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUpload, ApiError } from "@/lib/api";
 import type { Course, Lesson } from "@/lib/types";
 
-const EMPTY_LESSON = { title: "", type: "video", video_url: "", content: "", duration_minutes: 10, is_preview: false };
+const EMPTY_LESSON = {
+  title: "", type: "video", video_url: "", content: "", duration_minutes: 10, is_preview: false,
+  question: "", question_options: ["", ""] as string[], question_correct_index: 0,
+};
 
 export default function CourseEditorPage({
   params,
@@ -77,7 +80,15 @@ export default function CourseEditorPage({
   async function submitLesson(e: React.FormEvent) {
     e.preventDefault();
     if (!course) return;
-    const payload = { ...lessonForm, duration_minutes: Number(lessonForm.duration_minutes) };
+    const cleanOptions = lessonForm.question_options.filter((o) => o.trim() !== "");
+    const hasQuestion = lessonForm.question.trim() !== "" && cleanOptions.length >= 2;
+    const payload = {
+      ...lessonForm,
+      duration_minutes: Number(lessonForm.duration_minutes),
+      question: hasQuestion ? lessonForm.question : null,
+      question_options: hasQuestion ? cleanOptions : null,
+      question_correct_index: hasQuestion ? Math.min(lessonForm.question_correct_index, cleanOptions.length - 1) : null,
+    };
     if (editingLesson) {
       await apiPut(`/courses/${course.id}/lessons/${editingLesson}`, payload);
     } else {
@@ -97,8 +108,28 @@ export default function CourseEditorPage({
       content: l.content ?? "",
       duration_minutes: l.duration_minutes,
       is_preview: l.is_preview,
+      question: l.question ?? "",
+      question_options: l.question_options && l.question_options.length >= 2 ? l.question_options : ["", ""],
+      question_correct_index: l.question_correct_index ?? 0,
     });
   }
+
+  async function uploadVideo(lessonId: number, file: File) {
+    if (!course) return;
+    setMsg("Uploading video…");
+    try {
+      const fd = new FormData();
+      fd.append("video", file);
+      await apiUpload(`/courses/${course.id}/lessons/${lessonId}/video`, fd);
+      setMsg("Video uploaded ✔");
+      await load();
+    } catch (e) {
+      setMsg(e instanceof ApiError ? e.message : "Upload failed");
+    }
+  }
+
+  const setOption = (i: number, val: string) =>
+    setLessonForm((f) => ({ ...f, question_options: f.question_options.map((o, idx) => (idx === i ? val : o)) }));
 
   async function deleteLesson(l: Lesson) {
     if (!course || !confirm(`Delete lesson "${l.title}"?`)) return;
@@ -219,9 +250,40 @@ export default function CourseEditorPage({
               <input type="number" min="0" className="input" placeholder="Minutes" value={lessonForm.duration_minutes} onChange={(e) => setLessonForm({ ...lessonForm, duration_minutes: Number(e.target.value) })} />
             </div>
             {lessonForm.type === "video" && (
-              <input className="input" placeholder="Video embed URL (YouTube/Vimeo)" value={lessonForm.video_url} onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })} />
+              <div>
+                <input className="input" placeholder="Paste any YouTube or Vimeo link" value={lessonForm.video_url} onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })} />
+                <p className="mt-1 text-xs font-semibold text-[var(--muted)]">Paste a normal link like <code>youtube.com/watch?v=…</code> — it&apos;s converted automatically.</p>
+                {/* Upload a video file (only after the lesson exists) */}
+                {editingLesson && (
+                  <div className="mt-3 rounded-xl border border-dashed border-[var(--border)] p-3">
+                    <p className="text-xs font-bold text-[var(--muted)]">…or upload a video file (mp4/webm, max 200MB)</p>
+                    <input type="file" accept="video/mp4,video/webm,video/quicktime" className="mt-2 text-sm"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(editingLesson, f); }} />
+                  </div>
+                )}
+              </div>
             )}
             <textarea className="input min-h-20" placeholder="Lesson notes / content" value={lessonForm.content} onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })} />
+
+            {/* Per-lesson quiz question (unlocks the next lesson) */}
+            <div className="rounded-xl border border-[var(--border)] p-4">
+              <p className="text-sm font-extrabold">🧠 Quiz question <span className="font-semibold text-[var(--muted)]">(optional — students answer to unlock the next lesson)</span></p>
+              <textarea className="input mt-3 min-h-16" placeholder="Question text" value={lessonForm.question} onChange={(e) => setLessonForm({ ...lessonForm, question: e.target.value })} />
+              <p className="label mt-3">Options (pick the correct one)</p>
+              {lessonForm.question_options.map((opt, i) => (
+                <div key={i} className="mb-2 flex items-center gap-2">
+                  <input type="radio" name="lq-correct" checked={lessonForm.question_correct_index === i} onChange={() => setLessonForm({ ...lessonForm, question_correct_index: i })} className="h-4 w-4 accent-[var(--success)]" />
+                  <input className="input" placeholder={`Option ${i + 1}`} value={opt} onChange={(e) => setOption(i, e.target.value)} />
+                  {lessonForm.question_options.length > 2 && (
+                    <button type="button" onClick={() => setLessonForm({ ...lessonForm, question_options: lessonForm.question_options.filter((_, idx) => idx !== i) })} className="text-[var(--danger)]">×</button>
+                  )}
+                </div>
+              ))}
+              {lessonForm.question_options.length < 5 && (
+                <button type="button" onClick={() => setLessonForm({ ...lessonForm, question_options: [...lessonForm.question_options, ""] })} className="text-sm font-bold text-[var(--primary)] hover:underline">+ Add option</button>
+              )}
+            </div>
+
             <label className="flex items-center gap-2 text-sm font-bold">
               <input type="checkbox" checked={lessonForm.is_preview} onChange={(e) => setLessonForm({ ...lessonForm, is_preview: e.target.checked })} className="h-4 w-4 accent-[var(--primary)]" />
               Free preview (visible before enrolling)

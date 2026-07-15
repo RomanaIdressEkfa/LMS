@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 import type { Enrollment } from "@/lib/types";
 
 export default function MyLearningPage() {
+  const { t } = useLang();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,20 +17,20 @@ export default function MyLearningPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-[var(--muted)]">Loading your courses…</p>;
+  if (loading) return <p className="text-[var(--muted)]">{t("common.loading")}</p>;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl">My Learning</h1>
-        <p className="mt-1 text-[var(--muted)]">Pick up where you left off.</p>
+        <h1 className="text-3xl">{t("learn.title")}</h1>
+        <p className="mt-1 text-[var(--muted)]">{t("learn.sub")}</p>
       </div>
 
       {enrollments.length === 0 ? (
         <div className="card grid place-items-center p-12 text-center">
           <span className="text-4xl">📚</span>
-          <p className="mt-3 font-bold">You haven&apos;t enrolled in any courses yet.</p>
-          <Link href="/dashboard/courses" className="btn-primary mt-4">Browse Catalog</Link>
+          <p className="mt-3 font-bold">{t("learn.empty")}</p>
+          <Link href="/dashboard/courses" className="btn-primary mt-4">{t("learn.browse")}</Link>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -46,7 +48,7 @@ export default function MyLearningPage() {
                 />
               </div>
               <p className="mt-3 text-sm font-bold text-[var(--primary)]">
-                {e.progress >= 100 ? "✅ Completed" : "Continue →"}
+                {e.progress >= 100 ? `✅ ${t("learn.completed")}` : `${t("learn.continue")} →`}
               </p>
             </Link>
           ))}

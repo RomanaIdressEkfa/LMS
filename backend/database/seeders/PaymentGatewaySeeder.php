@@ -13,6 +13,10 @@ class PaymentGatewaySeeder extends Seeder
      */
     public const GATEWAYS = [
         ['key' => 'test',       'name' => 'Test (Sandbox)', 'currency' => 'USD'],
+        // Bangladeshi mobile wallets
+        ['key' => 'bkash',      'name' => 'bKash',       'currency' => 'BDT'],
+        ['key' => 'nagad',      'name' => 'Nagad',       'currency' => 'BDT'],
+        ['key' => 'rocket',     'name' => 'Rocket',      'currency' => 'BDT'],
         ['key' => 'stripe',     'name' => 'Stripe',      'currency' => 'USD'],
         ['key' => 'paypal',     'name' => 'PayPal',      'currency' => 'USD'],
         ['key' => 'razorpay',   'name' => 'Razorpay',    'currency' => 'INR'],

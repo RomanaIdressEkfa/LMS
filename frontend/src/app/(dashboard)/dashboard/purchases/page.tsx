@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet } from "@/lib/api";
+import { useLang } from "@/lib/i18n";
 
 interface Order {
   id: number;
@@ -24,6 +25,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function PurchasesPage() {
+  const { t } = useLang();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,20 +35,20 @@ export default function PurchasesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-[var(--muted)]">Loading orders…</p>;
+  if (loading) return <p className="text-[var(--muted)]">{t("common.loading")}</p>;
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl">My Purchases</h1>
-        <p className="mt-1 text-[var(--muted)]">Your order history and receipts.</p>
+        <h1 className="text-3xl">{t("buy.title")}</h1>
+        <p className="mt-1 text-[var(--muted)]">{t("buy.sub")}</p>
       </div>
 
       {orders.length === 0 ? (
         <div className="card grid place-items-center p-12 text-center">
           <span className="text-4xl">🧾</span>
-          <p className="mt-3 font-bold">No purchases yet.</p>
-          <Link href="/dashboard/courses" className="btn-primary mt-4">Browse Catalog</Link>
+          <p className="mt-3 font-bold">{t("buy.empty")}</p>
+          <Link href="/dashboard/courses" className="btn-primary mt-4">{t("learn.browse")}</Link>
         </div>
       ) : (
         <div className="card overflow-hidden">
@@ -54,11 +56,11 @@ export default function PurchasesPage() {
             <table className="w-full text-left text-sm">
               <thead className="border-b border-[var(--border)] text-[var(--muted)]">
                 <tr>
-                  <th className="p-4 font-bold">Order</th>
-                  <th className="p-4 font-bold">Course</th>
-                  <th className="p-4 font-bold">Method</th>
-                  <th className="p-4 font-bold">Amount</th>
-                  <th className="p-4 font-bold">Status</th>
+                  <th className="p-4 font-bold">{t("buy.order")}</th>
+                  <th className="p-4 font-bold">{t("buy.course")}</th>
+                  <th className="p-4 font-bold">{t("buy.method")}</th>
+                  <th className="p-4 font-bold">{t("buy.amount")}</th>
+                  <th className="p-4 font-bold">{t("buy.status")}</th>
                 </tr>
               </thead>
               <tbody>

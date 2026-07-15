@@ -70,8 +70,16 @@ export interface Lesson {
   duration_minutes: number;
   is_preview: boolean;
   locked?: boolean;
+  unlocked?: boolean;
+  completed?: boolean;
+  has_question?: boolean;
   video_url?: string | null;
+  video_file?: string | null;
+  video_file_url?: string | null;
   content?: string | null;
+  question?: string | null;
+  question_options?: string[] | null;
+  question_correct_index?: number | null;
   sort_order?: number;
 }
 

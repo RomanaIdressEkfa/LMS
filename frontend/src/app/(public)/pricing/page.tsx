@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiGet } from "@/lib/api";
+import { useContent, loc } from "@/lib/content";
+import { useLang } from "@/lib/i18n";
 
 interface Plan {
   id: number;
@@ -23,6 +25,8 @@ const MODULE_LABELS: Record<string, string> = {
 const CARD_GRAD = ["grad-primary", "grad-purple", "grad-sunset"];
 
 export default function PricingPage() {
+  const { pricing } = useContent();
+  const { lang } = useLang();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,9 +37,9 @@ export default function PricingPage() {
   return (
     <div>
       <section className="grad-hero border-b border-[var(--border)]">
-        <div className="mx-auto max-w-7xl px-5 py-14 text-center md:px-8">
-          <h1 className="text-4xl md:text-5xl">Simple, <span className="gradient-text">honest pricing</span></h1>
-          <p className="mx-auto mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">Pick a plan for your academy. Enable only the modules you need.</p>
+        <div className="mx-auto max-w-[1600px] px-5 py-14 text-center md:px-8">
+          <h1 className="text-4xl md:text-5xl">{loc(pricing.hero.titleA, lang)} <span className="gradient-text">{loc(pricing.hero.titleHl, lang)}</span></h1>
+          <p className="mx-auto mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">{loc(pricing.hero.subtitle, lang)}</p>
         </div>
       </section>
 
@@ -71,7 +75,7 @@ export default function PricingPage() {
           </div>
         )}
         <p className="mt-10 text-center text-sm font-semibold text-[var(--muted)]">
-          All plans include unlimited students and lifetime updates. Need something custom?{" "}
+          {loc(pricing.footnote, lang)}{" "}
           <Link href="/contact" className="font-bold text-[var(--primary)] hover:underline">Contact us</Link>.
         </p>
       </div>
