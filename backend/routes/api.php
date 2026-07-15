@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProgressController;
+use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\LiveSessionController;
 use App\Http\Controllers\Api\QuizController;
@@ -144,6 +145,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/{course}/lessons/{lesson}/progress', [ProgressController::class, 'toggle']);
     // Answer a lesson's quiz question to complete it and unlock the next.
     Route::post('/courses/{course}/lessons/{lesson}/answer', [ProgressController::class, 'answer']);
+    // Completion certificate (only once the course is 100% complete).
+    Route::get('/courses/{slug}/certificate', [CertificateController::class, 'show']);
 
     // ---- Teaching (instructors) ----
     Route::get('/my/courses', [CourseController::class, 'mine'])

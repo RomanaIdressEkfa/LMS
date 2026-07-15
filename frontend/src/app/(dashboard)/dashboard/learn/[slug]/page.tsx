@@ -92,6 +92,20 @@ export default function LessonViewerPage({
       <div className="space-y-4">
         <Link href="/dashboard/learn" className="text-sm font-bold text-[var(--primary)] hover:underline">← My Learning</Link>
 
+        {/* Course finished → offer the certificate */}
+        {progress >= 100 && (
+          <div className="card flex flex-wrap items-center justify-between gap-3 border-[var(--success)]/40 bg-[var(--success)]/5 p-5">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎓</span>
+              <div>
+                <p className="font-extrabold text-[var(--foreground)]">Course complete — congratulations!</p>
+                <p className="text-sm text-[var(--muted)]">You&apos;ve earned your certificate of completion.</p>
+              </div>
+            </div>
+            <Link href={`/dashboard/certificate/${course.slug}`} className="btn-primary shrink-0">Get your certificate →</Link>
+          </div>
+        )}
+
         <div className="card overflow-hidden">
           {/* Video: uploaded file OR embed */}
           {active?.video_file_url ? (
