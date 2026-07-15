@@ -2,13 +2,47 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { apiGet, apiPost, apiPut, apiDelete, apiUpload, ApiError } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiDelete, apiUploadProgress, ApiError } from "@/lib/api";
 import type { Course, Lesson } from "@/lib/types";
 
 const EMPTY_LESSON = {
   title: "", type: "video", video_url: "", content: "", duration_minutes: 10, is_preview: false,
   question: "", question_options: ["", ""] as string[], question_correct_index: 0,
 };
+
+/** Fisher–Yates shuffle (returns a new array). */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * Build a simple multiple-choice question with no AI: the correct answer is
+ * this lesson's topic (its title); distractors are drawn from the other
+ * lessons' titles, padded with generic options. Instructor can edit after.
+ */
+function generateMcq(title: string, siblingTitles: string[]): { question: string; options: string[]; correctIndex: number } {
+  const correct = (title || "").trim() || "This lesson's topic";
+  const pool = siblingTitles
+    .map((t) => t.trim())
+    .filter((t) => t && t.toLowerCase() !== correct.toLowerCase());
+  const generics = ["A different topic", "None of the above", "An unrelated subject", "Something else entirely"];
+  const distractors = shuffle(pool).slice(0, 3);
+  for (const g of generics) {
+    if (distractors.length >= 3) break;
+    if (!distractors.includes(g)) distractors.push(g);
+  }
+  const options = shuffle([correct, ...distractors]);
+  return {
+    question: `Which topic does this lesson focus on?`,
+    options,
+    correctIndex: options.indexOf(correct),
+  };
+}
 
 export default function CourseEditorPage({
   params,
@@ -27,6 +61,9 @@ export default function CourseEditorPage({
   // lesson form
   const [lessonForm, setLessonForm] = useState<typeof EMPTY_LESSON>(EMPTY_LESSON);
   const [editingLesson, setEditingLesson] = useState<number | null>(null);
+
+  // video upload progress (null = not uploading)
+  const [uploadPct, setUploadPct] = useState<number | null>(null);
 
   async function load() {
     const { course } = await apiGet<{ course: Course }>(`/courses/${id}/manage`);
@@ -77,6 +114,15 @@ export default function CourseEditorPage({
     await load();
   }
 
+  /** Fill the quiz fields with an auto-generated (no-AI) MCQ. */
+  function autoGenerateQuestion() {
+    const siblings = (course?.lessons ?? [])
+      .filter((l) => l.id !== editingLesson)
+      .map((l) => l.title);
+    const { question, options, correctIndex } = generateMcq(lessonForm.title, siblings);
+    setLessonForm((f) => ({ ...f, question, question_options: options, question_correct_index: correctIndex }));
+  }
+
   async function submitLesson(e: React.FormEvent) {
     e.preventDefault();
     if (!course) return;
@@ -91,12 +137,23 @@ export default function CourseEditorPage({
     };
     if (editingLesson) {
       await apiPut(`/courses/${course.id}/lessons/${editingLesson}`, payload);
+      setLessonForm(EMPTY_LESSON);
+      setEditingLesson(null);
+      setMsg("Lesson updated ✔");
+      await load();
     } else {
-      await apiPost(`/courses/${course.id}/lessons`, payload);
+      const { lesson } = await apiPost<{ lesson: Lesson }>(`/courses/${course.id}/lessons`, payload);
+      await load();
+      // Keep a new video lesson open in edit mode so its video can be uploaded
+      // right away — no need to find it and click "Edit" again.
+      if (lessonForm.type === "video") {
+        setEditingLesson(lesson.id);
+        setMsg("Lesson added ✔ — now upload its video below.");
+      } else {
+        setLessonForm(EMPTY_LESSON);
+        setMsg("Lesson added ✔");
+      }
     }
-    setLessonForm(EMPTY_LESSON);
-    setEditingLesson(null);
-    await load();
   }
 
   function editLesson(l: Lesson) {
@@ -116,15 +173,23 @@ export default function CourseEditorPage({
 
   async function uploadVideo(lessonId: number, file: File) {
     if (!course) return;
-    setMsg("Uploading video…");
+    const MAX = 200 * 1024 * 1024; // 200MB — matches backend validation
+    if (file.size > MAX) {
+      setMsg(`That file is ${(file.size / 1024 / 1024).toFixed(0)}MB — the limit is 200MB.`);
+      return;
+    }
+    setUploadPct(0);
+    setMsg(null);
     try {
       const fd = new FormData();
       fd.append("video", file);
-      await apiUpload(`/courses/${course.id}/lessons/${lessonId}/video`, fd);
+      await apiUploadProgress(`/courses/${course.id}/lessons/${lessonId}/video`, fd, setUploadPct);
       setMsg("Video uploaded ✔");
       await load();
     } catch (e) {
       setMsg(e instanceof ApiError ? e.message : "Upload failed");
+    } finally {
+      setUploadPct(null);
     }
   }
 
@@ -139,6 +204,8 @@ export default function CourseEditorPage({
 
   if (loading) return <p className="text-[var(--muted)]">Loading editor…</p>;
   if (!course) return <p className="text-[var(--muted)]">Course not found.</p>;
+
+  const editingVideoUrl = course.lessons?.find((l) => l.id === editingLesson)?.video_file_url;
 
   return (
     <div className="space-y-6">
@@ -254,12 +321,29 @@ export default function CourseEditorPage({
                 <input className="input" placeholder="Paste any YouTube or Vimeo link" value={lessonForm.video_url} onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })} />
                 <p className="mt-1 text-xs font-semibold text-[var(--muted)]">Paste a normal link like <code>youtube.com/watch?v=…</code> — it&apos;s converted automatically.</p>
                 {/* Upload a video file (only after the lesson exists) */}
-                {editingLesson && (
+                {editingLesson ? (
                   <div className="mt-3 rounded-xl border border-dashed border-[var(--border)] p-3">
-                    <p className="text-xs font-bold text-[var(--muted)]">…or upload a video file (mp4/webm, max 200MB)</p>
-                    <input type="file" accept="video/mp4,video/webm,video/quicktime" className="mt-2 text-sm"
-                      onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(editingLesson, f); }} />
+                    <p className="text-xs font-bold text-[var(--muted)]">…or upload a video file (mp4/webm/mov, max 200MB)</p>
+                    {editingVideoUrl && uploadPct === null && (
+                      <p className="mt-1 text-xs font-bold text-[var(--success)]">✓ A video is uploaded for this lesson — choose a file to replace it.</p>
+                    )}
+                    <input type="file" accept="video/mp4,video/webm,video/quicktime" disabled={uploadPct !== null}
+                      className="mt-2 text-sm disabled:opacity-50"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(editingLesson, f); e.target.value = ""; }} />
+                    {uploadPct !== null && (
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-xs font-bold text-[var(--muted)]">
+                          <span>{uploadPct < 100 ? "Uploading…" : "Processing…"}</span>
+                          <span>{uploadPct}%</span>
+                        </div>
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--border)]">
+                          <div className="grad-primary h-full rounded-full transition-all" style={{ width: `${uploadPct}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <p className="mt-2 text-xs font-semibold text-[var(--muted)]">💡 Add the lesson first, then upload a video file for it.</p>
                 )}
               </div>
             )}
@@ -267,7 +351,10 @@ export default function CourseEditorPage({
 
             {/* Per-lesson quiz question (unlocks the next lesson) */}
             <div className="rounded-xl border border-[var(--border)] p-4">
-              <p className="text-sm font-extrabold">🧠 Quiz question <span className="font-semibold text-[var(--muted)]">(optional — students answer to unlock the next lesson)</span></p>
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-extrabold">🧠 Quiz question <span className="font-semibold text-[var(--muted)]">(optional — students answer to unlock the next lesson)</span></p>
+                <button type="button" onClick={autoGenerateQuestion} className="btn-ghost shrink-0 !py-1.5 !px-3 text-xs">✨ Generate</button>
+              </div>
               <textarea className="input mt-3 min-h-16" placeholder="Question text" value={lessonForm.question} onChange={(e) => setLessonForm({ ...lessonForm, question: e.target.value })} />
               <p className="label mt-3">Options (pick the correct one)</p>
               {lessonForm.question_options.map((opt, i) => (

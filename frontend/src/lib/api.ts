@@ -79,6 +79,44 @@ export async function apiUpload<T = unknown>(path: string, formData: FormData): 
   return data as T;
 }
 
+/**
+ * Multipart upload with real upload-progress reporting (uses XMLHttpRequest,
+ * since fetch cannot report request-body upload progress). `onProgress` gets a
+ * 0–100 percentage; it stays at 0 until the browser starts sending bytes.
+ */
+export function apiUploadProgress<T = unknown>(
+  path: string,
+  formData: FormData,
+  onProgress?: (percent: number) => void
+): Promise<T> {
+  const token = getToken();
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}${path}`);
+    xhr.setRequestHeader("Accept", "application/json");
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      let data: unknown = {};
+      try { data = JSON.parse(xhr.responseText); } catch { /* non-JSON body */ }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data as T);
+      } else {
+        const d = data as { message?: string; errors?: Record<string, string[]> };
+        reject(new ApiError(d.message ?? "Upload failed", xhr.status, d.errors));
+      }
+    };
+    xhr.onerror = () => reject(new ApiError("Network error during upload", 0));
+    xhr.send(formData);
+  });
+}
+
 export const apiGet = <T = unknown>(path: string) => api<T>(path);
 export const apiPost = <T = unknown>(path: string, body?: unknown) =>
   api<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });
