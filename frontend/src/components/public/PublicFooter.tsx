@@ -1,6 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useContent, loc } from "@/lib/content";
+import { useLang } from "@/lib/i18n";
 
 export function PublicFooter() {
+  const { footer } = useContent();
+  const { lang } = useLang();
+  const brand = footer.brand || "LMS";
+
   return (
     <footer className="grad-ph relative overflow-hidden text-white">
       <div className="blob grad-magenta -right-20 -top-20 h-72 w-72" />
@@ -8,10 +16,10 @@ export function PublicFooter() {
         <div className="md:col-span-1">
           <div className="flex items-center gap-2.5">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/15 text-lg">✦</span>
-            <span className="text-xl font-extrabold">LMS</span>
+            <span className="text-xl font-extrabold">{brand}</span>
           </div>
           <p className="mt-3 max-w-xs text-sm font-semibold text-white/80">
-            Create, sell and teach courses. Grow your online academy — all in one bold platform.
+            {loc(footer.tagline, lang)}
           </p>
         </div>
         <FooterCol title="Platform" links={[["Courses", "/courses"], ["Instructors", "/instructors"], ["Pricing", "/pricing"]]} />
@@ -20,7 +28,7 @@ export function PublicFooter() {
       </div>
       <div className="relative border-t border-white/15">
         <div className="mx-auto max-w-[1600px] px-5 py-6 text-center text-sm font-semibold text-white/75 md:px-8">
-          © {new Date().getFullYear()} LMS. All rights reserved.
+          © {new Date().getFullYear()} {brand}. All rights reserved.
         </div>
       </div>
     </footer>

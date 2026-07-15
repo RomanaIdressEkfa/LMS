@@ -106,6 +106,10 @@ class SiteContentController extends Controller
                 ['icon' => '📍', 'title' => ['en' => 'Office', 'bn' => 'অফিস'], 'value' => ['en' => 'Remote-first, worldwide', 'bn' => 'রিমোট-ফার্স্ট, বিশ্বজুড়ে'], 'grad' => 'grad-sunset'],
             ],
         ],
+        'footer' => [
+            'brand' => 'LMS',
+            'tagline' => ['en' => 'Create, sell and teach courses. Grow your online academy — all in one bold platform.', 'bn' => 'কোর্স তৈরি, বিক্রি ও শেখান। আপনার অনলাইন একাডেমি গড়ে তুলুন — সব এক সাহসী প্ল্যাটফর্মে।'],
+        ],
     ];
 
     /** Public: the effective content + any saved bilingual text overrides. */

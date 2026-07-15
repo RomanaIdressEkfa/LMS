@@ -57,6 +57,10 @@ export interface SiteContent {
     hero: Hero;
     channels: ChannelItem[];
   };
+  footer: {
+    brand: string;
+    tagline: Loc;
+  };
 }
 
 export const CONTENT_DEFAULTS: SiteContent = {
@@ -142,6 +146,10 @@ export const CONTENT_DEFAULTS: SiteContent = {
       { icon: "💬", title: L("Live chat", "লাইভ চ্যাট"), value: L("Mon–Fri, 9am–6pm", "সোম–শুক্র, সকাল ৯টা–সন্ধ্যা ৬টা"), grad: "grad-purple" },
       { icon: "📍", title: L("Office", "অফিস"), value: L("Remote-first, worldwide", "রিমোট-ফার্স্ট, বিশ্বজুড়ে"), grad: "grad-sunset" },
     ],
+  },
+  footer: {
+    brand: "LMS",
+    tagline: L("Create, sell and teach courses. Grow your online academy — all in one bold platform.", "কোর্স তৈরি, বিক্রি ও শেখান। আপনার অনলাইন একাডেমি গড়ে তুলুন — সব এক সাহসী প্ল্যাটফর্মে।"),
   },
 };
 

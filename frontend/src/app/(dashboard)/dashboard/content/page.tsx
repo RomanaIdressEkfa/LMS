@@ -155,9 +155,9 @@ function StringListEditor({ title, items, onChange }: { title: string; items: st
   );
 }
 
-const TABS = ["home", "about", "pricing", "instructors", "contact", "text"] as const;
+const TABS = ["home", "about", "pricing", "instructors", "contact", "footer", "text"] as const;
 type Tab = (typeof TABS)[number];
-const TAB_LABELS: Record<Tab, string> = { home: "Home", about: "About", pricing: "Pricing", instructors: "Instructors", contact: "Contact", text: "Text (EN/BN)" };
+const TAB_LABELS: Record<Tab, string> = { home: "Home", about: "About", pricing: "Pricing", instructors: "Instructors", contact: "Contact", footer: "Footer", text: "Text (EN/BN)" };
 
 export default function ContentPage() {
   const { can } = useAuth();
@@ -340,6 +340,21 @@ export default function ContentPage() {
                 onChange={(v) => patch((c) => { c.contact.channels = v as unknown as typeof c.contact.channels; return c; })} />
             </div>
           </>
+        )}
+
+        {/* ---------- FOOTER ---------- */}
+        {tab === "footer" && (
+          <div className="card p-6">
+            <h3 className="text-lg">Footer</h3>
+            <div className="mt-3 space-y-3">
+              <div>
+                <label className="label">Brand name</label>
+                <input className="input" value={content.footer.brand} onChange={(e) => patch((c) => { c.footer.brand = e.target.value; return c; })} />
+              </div>
+              <LocField label="Tagline" textarea value={content.footer.tagline} onChange={(v) => patch((c) => { c.footer.tagline = v; return c; })} />
+            </div>
+            <p className="mt-2 text-xs text-[var(--muted)]">The footer link columns come from the site’s page routes.</p>
+          </div>
         )}
 
         {/* ---------- TEXT (bilingual) ---------- */}
