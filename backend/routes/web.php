@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
@@ -56,6 +57,21 @@ Route::middleware('auth')->group(function () {
 
     // Live classes
     Route::get('/dashboard/live', [LiveController::class, 'index'])->middleware('permission:live.view')->name('live');
+
+    // Admin
+    Route::middleware('permission:modules.view')->group(function () {
+        Route::get('/dashboard/modules', [AdminController::class, 'modules'])->name('modules');
+        Route::post('/dashboard/modules/{module}/toggle', [AdminController::class, 'toggleModule']);
+    });
+    Route::middleware('permission:gateways.view')->group(function () {
+        Route::get('/dashboard/gateways', [AdminController::class, 'gateways'])->name('gateways');
+        Route::post('/dashboard/gateways/{gateway}/toggle', [AdminController::class, 'toggleGateway']);
+    });
+    Route::middleware('permission:users.view')->group(function () {
+        Route::get('/dashboard/users', [AdminController::class, 'users'])->name('users');
+        Route::post('/dashboard/users/{user}/status', [AdminController::class, 'toggleUserStatus']);
+        Route::post('/dashboard/users/{user}/role', [AdminController::class, 'setUserRole']);
+    });
 
     // Teaching (instructors)
     Route::middleware('permission:courses.create')->group(function () {
