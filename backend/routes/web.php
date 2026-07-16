@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LearnController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\TeachingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,4 +37,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/learn', [LearnController::class, 'index'])->name('learn');
     Route::get('/dashboard/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
     Route::post('/dashboard/courses/{course}/lessons/{lesson}/answer', [LearnController::class, 'answer'])->name('learn.answer');
+
+    // Teaching (instructors)
+    Route::middleware('permission:courses.create')->group(function () {
+        Route::get('/dashboard/teaching', [TeachingController::class, 'index'])->name('teaching');
+        Route::post('/dashboard/teaching', [TeachingController::class, 'store']);
+        Route::get('/dashboard/teaching/{course}', [TeachingController::class, 'edit'])->name('teaching.edit');
+        Route::put('/dashboard/teaching/{course}', [TeachingController::class, 'updateCourse']);
+        Route::post('/dashboard/teaching/{course}/publish', [TeachingController::class, 'publish']);
+        Route::post('/dashboard/teaching/{course}/lessons', [TeachingController::class, 'storeLesson']);
+        Route::put('/dashboard/teaching/{course}/lessons/{lesson}', [TeachingController::class, 'updateLesson']);
+        Route::delete('/dashboard/teaching/{course}/lessons/{lesson}', [TeachingController::class, 'destroyLesson']);
+        Route::post('/dashboard/teaching/{course}/lessons/{lesson}/video', [TeachingController::class, 'uploadVideo']);
+    });
 });
