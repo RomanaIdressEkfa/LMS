@@ -78,6 +78,18 @@ Route::middleware('auth')->group(function () {
         Route::put('/dashboard/content', [\App\Http\Controllers\Api\SiteContentController::class, 'update']);
         Route::put('/dashboard/content/text', [\App\Http\Controllers\Api\SiteContentController::class, 'saveText']);
     });
+    // Settings + Roles
+    Route::middleware('permission:settings.view')->group(function () {
+        Route::get('/dashboard/settings', [AdminController::class, 'settings'])->name('settings');
+        Route::put('/dashboard/settings', [AdminController::class, 'updateSettings']);
+    });
+    Route::get('/dashboard/roles', [AdminController::class, 'roles'])->middleware('permission:roles.view')->name('roles');
+    // Platform: plans + tenants
+    Route::middleware('permission:tenants.view')->group(function () {
+        Route::get('/dashboard/platform/plans', [AdminController::class, 'plans'])->name('plans');
+        Route::delete('/dashboard/platform/plans/{plan}', [AdminController::class, 'deletePlan']);
+        Route::get('/dashboard/platform/tenants', [AdminController::class, 'tenants'])->name('tenants');
+    });
 
     // Teaching (instructors)
     Route::middleware('permission:courses.create')->group(function () {

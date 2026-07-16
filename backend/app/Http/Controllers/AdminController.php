@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SiteContentController;
 use App\Models\Module;
 use App\Models\PaymentGateway;
+use App\Models\Plan;
+use App\Models\Setting;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Translations;
 use Illuminate\Http\Request;
@@ -114,5 +118,70 @@ class AdminController extends Controller
             'groups' => self::TEXT_GROUPS,
             'canManage' => auth()->user()->can('settings.manage'),
         ]);
+    }
+
+    /* ---------------- Settings ---------------- */
+    public function settings()
+    {
+        $settings = collect(SettingsController::SCHEMA)
+            ->map(fn ($s) => array_merge($s, [
+                'value' => Setting::get($s['key'], SettingsController::DEFAULTS[$s['key']] ?? ($s['type'] === 'bool' ? false : '')),
+            ]))
+            ->groupBy('group');
+
+        return view('dashboard.admin.settings', [
+            'groups' => $settings,
+            'canManage' => auth()->user()->can('settings.manage'),
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        abort_unless($request->user()->can('settings.manage'), 403);
+
+        foreach (SettingsController::SCHEMA as $s) {
+            $key = $s['key'];
+            $value = $s['type'] === 'bool'
+                ? $request->boolean("settings.$key")
+                : (string) $request->input("settings.$key", '');
+            Setting::set($key, $value, $s['group'], $s['type']);
+        }
+
+        return back()->with('ok', 'Settings saved.');
+    }
+
+    /* ---------------- Roles (read-only view) ---------------- */
+    public function roles()
+    {
+        $roles = Role::with('permissions:id,name')->orderBy('id')->get()->map(fn (Role $r) => [
+            'name' => $r->name,
+            'users_count' => $r->users()->count(),
+            'protected' => in_array($r->name, ['super-admin', 'admin', 'teacher', 'student'], true),
+            'permissions' => $r->permissions->pluck('name')->sort()->values(),
+        ]);
+
+        return view('dashboard.admin.roles', compact('roles'));
+    }
+
+    /* ---------------- Plans ---------------- */
+    public function plans()
+    {
+        return view('dashboard.admin.plans', ['plans' => Plan::withCount('tenants')->orderBy('sort_order')->orderBy('price')->get()]);
+    }
+
+    public function deletePlan(Plan $plan)
+    {
+        if ($plan->tenants()->exists()) {
+            return back()->with('err', 'Cannot delete a plan that has tenants.');
+        }
+        $plan->delete();
+
+        return back()->with('ok', 'Plan deleted.');
+    }
+
+    /* ---------------- Tenants (read-only view) ---------------- */
+    public function tenants()
+    {
+        return view('dashboard.admin.tenants', ['tenants' => Tenant::with('plan:id,name')->latest()->get()]);
     }
 }
