@@ -80,10 +80,47 @@ return [
     'ph.finalTitle' => ['en' => 'Ready to start your journey?', 'bn' => 'আপনার যাত্রা শুরু করতে প্রস্তুত?'],
     'ph.finalSub' => ['en' => 'Join thousands of learners building real careers with us.', 'bn' => 'হাজারো শিক্ষার্থীর সাথে যোগ দিন যারা রিয়েল ক্যারিয়ার গড়ছে।'],
 
-    // ---- Catalog / My Learning (used by later phases) ----
+    // ---- Catalog / My Learning ----
+    'cat.title' => ['en' => 'Course Catalog', 'bn' => 'কোর্স ক্যাটালগ'],
+    'cat.sub' => ['en' => 'Browse and enroll — free courses start instantly.', 'bn' => 'ব্রাউজ ও এনরোল করুন — ফ্রি কোর্স সাথে সাথে শুরু হয়।'],
     'cat.lessons' => ['en' => 'lessons', 'bn' => 'লেসন'],
     'learn.title' => ['en' => 'My Learning', 'bn' => 'আমার শেখা'],
+    'learn.sub' => ['en' => 'Pick up where you left off.', 'bn' => 'যেখানে থেমেছিলেন সেখান থেকে শুরু করুন।'],
+    'learn.empty' => ['en' => "You haven't enrolled in any courses yet.", 'bn' => 'আপনি এখনো কোনো কোর্সে এনরোল করেননি।'],
+    'learn.browse' => ['en' => 'Browse Catalog', 'bn' => 'ক্যাটালগ দেখুন'],
     'learn.completed' => ['en' => 'Completed', 'bn' => 'সম্পন্ন'],
     'learn.continue' => ['en' => 'Continue', 'bn' => 'চালিয়ে যান'],
     'common.loading' => ['en' => 'Loading…', 'bn' => 'লোড হচ্ছে…'],
+
+    // ---- Dashboard sidebar ----
+    'side.main' => ['en' => 'Main', 'bn' => 'মূল'],
+    'side.education' => ['en' => 'Education', 'bn' => 'শিক্ষা'],
+    'side.administration' => ['en' => 'Administration', 'bn' => 'অ্যাডমিনিস্ট্রেশন'],
+    'side.platform' => ['en' => 'Platform', 'bn' => 'প্ল্যাটফর্ম'],
+    'side.dashboard' => ['en' => 'Dashboard', 'bn' => 'ড্যাশবোর্ড'],
+    'side.catalog' => ['en' => 'Course Catalog', 'bn' => 'কোর্স ক্যাটালগ'],
+    'side.learning' => ['en' => 'My Learning', 'bn' => 'আমার শেখা'],
+    'side.purchases' => ['en' => 'My Purchases', 'bn' => 'আমার কেনাকাটা'],
+    'side.teaching' => ['en' => 'Teaching', 'bn' => 'শিক্ষকতা'],
+    'side.live' => ['en' => 'Live Classes', 'bn' => 'লাইভ ক্লাস'],
+    'side.quizzes' => ['en' => 'Quizzes', 'bn' => 'কুইজ'],
+    'side.users' => ['en' => 'Users', 'bn' => 'ইউজার'],
+    'side.roles' => ['en' => 'Roles & Permissions', 'bn' => 'রোল ও পারমিশন'],
+    'side.modules' => ['en' => 'Modules / Addons', 'bn' => 'মডিউল / অ্যাডন'],
+    'side.gateways' => ['en' => 'Payment Gateways', 'bn' => 'পেমেন্ট গেটওয়ে'],
+    'side.content' => ['en' => 'Site Content', 'bn' => 'সাইট কনটেন্ট'],
+    'side.settings' => ['en' => 'Settings', 'bn' => 'সেটিংস'],
+    'side.tenants' => ['en' => 'Tenants', 'bn' => 'টেন্যান্ট'],
+    'side.plans' => ['en' => 'Plans', 'bn' => 'প্ল্যান'],
+    'topbar.logout' => ['en' => 'Logout', 'bn' => 'লগআউট'],
+
+    // ---- Dashboard home ----
+    'dash.hello' => ['en' => 'Hello', 'bn' => 'হ্যালো'],
+    'dash.welcome' => ['en' => 'Welcome to your dashboard. Everything you can see here is controlled by your role\'s permissions.', 'bn' => 'আপনার ড্যাশবোর্ডে স্বাগতম। এখানে যা দেখছেন সবকিছু আপনার রোলের পারমিশন দিয়ে নিয়ন্ত্রিত।'],
+    'dash.stat.courses' => ['en' => 'Enrolled Courses', 'bn' => 'এনরোল করা কোর্স'],
+    'dash.stat.certs' => ['en' => 'Certificates', 'bn' => 'সার্টিফিকেট'],
+    'dash.stat.live' => ['en' => 'Live Sessions', 'bn' => 'লাইভ সেশন'],
+    'dash.stat.teaching' => ['en' => 'Courses Teaching', 'bn' => 'যে কোর্স পড়াচ্ছেন'],
+    'dash.access' => ['en' => 'Your access', 'bn' => 'আপনার অ্যাক্সেস'],
+    'dash.accessSub' => ['en' => 'These are the permissions your role grants. The sidebar and every page adapt to exactly this list.', 'bn' => 'এগুলো আপনার রোলের দেওয়া পারমিশন। সাইডবার ও প্রতিটি পেজ ঠিক এই লিস্ট অনুযায়ী পরিবর্তিত হয়।'],
 ];

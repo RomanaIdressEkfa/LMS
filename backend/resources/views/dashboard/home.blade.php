@@ -1,34 +1,45 @@
-@extends('layouts.bare')
+@extends('layouts.dashboard')
 @section('title', 'Dashboard — LMS')
 
 @section('content')
-<div class="mx-auto max-w-3xl px-5 py-16 md:px-8">
-    <div class="flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2.5">
-            <span class="grid h-9 w-9 place-items-center rounded-xl grad-primary text-lg text-white">✦</span>
-            <span class="text-xl font-extrabold">LMS</span>
-        </a>
-        <form method="POST" action="/logout">
-            @csrf
-            <button class="btn-ghost">Logout</button>
-        </form>
+<div class="space-y-6">
+    <div>
+        <h1 class="text-3xl"><x-t k="dash.hello" />, {{ $user->name }} 👋</h1>
+        <p class="mt-1 text-[var(--muted)]"><x-t k="dash.welcome" /></p>
     </div>
 
-    <div class="card mt-8 p-8">
-        <span class="text-4xl">👋</span>
-        <h1 class="mt-3 text-3xl">Hello, {{ $user->name }}</h1>
-        <p class="mt-1 text-[var(--muted)]">You are signed in as
-            <b class="text-[var(--foreground)]">{{ $user->getRoleNames()->join(', ') ?: 'user' }}</b>.
-        </p>
+    {{-- Stat cards --}}
+    @php
+        $stats = [
+            ['📚', $enrolledCount, 'dash.stat.courses', 'grad-primary'],
+            ['🎓', $completedCount, 'dash.stat.certs', 'grad-purple'],
+        ];
+        if ($user->can('courses.create')) {
+            $stats[] = ['✏️', $teachingCount, 'dash.stat.teaching', 'grad-sunset'];
+        }
+    @endphp
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        @foreach ($stats as [$icon, $value, $label, $grad])
+            <div class="card flex items-center gap-4 p-6">
+                <div class="{{ $grad }} grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl text-white">{{ $icon }}</div>
+                <div>
+                    <p class="text-3xl font-extrabold">{{ $value }}</p>
+                    <p class="text-sm font-bold text-[var(--muted)]"><x-t :k="$label" /></p>
+                </div>
+            </div>
+        @endforeach
+    </div>
 
-        <div class="mt-6 rounded-[var(--radius)] bg-[var(--primary-soft)] p-5">
-            <p class="font-bold text-[var(--primary)]">🚧 The full dashboard is being rebuilt in Blade (Phase 3).</p>
-            <p class="mt-1 text-sm font-semibold text-[var(--muted)]">Learning, teaching, quizzes, certificates and admin tools are coming next.</p>
-        </div>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-            <a href="/courses" class="btn-primary">Browse courses</a>
-            <a href="/" class="btn-ghost">Back to site</a>
+    {{-- Access / permissions --}}
+    <div class="card p-6 md:p-8">
+        <h2 class="text-xl"><x-t k="dash.access" /></h2>
+        <p class="mt-1 text-sm font-semibold text-[var(--muted)]"><x-t k="dash.accessSub" /></p>
+        <div class="mt-5 flex flex-wrap gap-2">
+            @forelse ($permissions as $p)
+                <span class="rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-1 text-xs font-bold text-[var(--foreground)]">{{ $p }}</span>
+            @empty
+                <span class="text-sm text-[var(--muted)]">No special permissions.</span>
+            @endforelse
         </div>
     </div>
 </div>
