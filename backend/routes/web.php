@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
 /*
  * Public marketing site — server-rendered Blade (replaces the Next.js frontend).
- * Dashboard / auth pages are added in a later phase.
  */
 Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
@@ -14,3 +15,17 @@ Route::get('/instructors', [PublicController::class, 'instructors'])->name('inst
 Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
 Route::get('/courses', [PublicController::class, 'courses'])->name('courses');
 Route::get('/courses/{slug}', [PublicController::class, 'courseShow'])->name('courses.show');
+
+/*
+ * Auth (session-based).
+ */
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+/*
+ * Dashboard (auth-only) — placeholder for now; full Blade dashboard is Phase 3.
+ */
+Route::get('/dashboard', [DashboardController::class, 'home'])->middleware('auth')->name('dashboard');
