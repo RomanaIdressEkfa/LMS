@@ -72,6 +72,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/dashboard/users/{user}/status', [AdminController::class, 'toggleUserStatus']);
         Route::post('/dashboard/users/{user}/role', [AdminController::class, 'setUserRole']);
     });
+    // Site content editor (view needs settings.view; saving needs settings.manage)
+    Route::get('/dashboard/content', [AdminController::class, 'content'])->middleware('permission:settings.view')->name('content');
+    Route::middleware('permission:settings.manage')->group(function () {
+        Route::put('/dashboard/content', [\App\Http\Controllers\Api\SiteContentController::class, 'update']);
+        Route::put('/dashboard/content/text', [\App\Http\Controllers\Api\SiteContentController::class, 'saveText']);
+    });
 
     // Teaching (instructors)
     Route::middleware('permission:courses.create')->group(function () {

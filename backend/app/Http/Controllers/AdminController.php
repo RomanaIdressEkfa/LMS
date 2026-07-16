@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\SiteContentController;
 use App\Models\Module;
 use App\Models\PaymentGateway;
 use App\Models\User;
+use App\Support\Translations;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
@@ -77,5 +79,40 @@ class AdminController extends Controller
         $user->syncRoles([$data['role']]);
 
         return back()->with('ok', "{$user->name}'s role updated to {$data['role']}.");
+    }
+
+    /* ---------------- Site content editor ---------------- */
+
+    /** Curated i18n keys exposed for bilingual editing, grouped for the UI. */
+    public const TEXT_GROUPS = [
+        'Hero' => [
+            'ph.badge' => 'Badge', 'ph.h1a' => 'Headline start', 'ph.h1b' => 'Headline highlight', 'ph.h1c' => 'Headline end',
+            'ph.heroSub' => 'Subtitle', 'ph.cta1' => 'Primary button', 'ph.cta2' => 'Secondary button',
+            'ph.badge1' => 'Pill 1', 'ph.badge2' => 'Pill 2', 'ph.badge3' => 'Pill 3', 'ph.techLabel' => 'Tech strip label',
+        ],
+        'Section titles' => [
+            'ph.whyTitle' => 'Why — title', 'ph.whySub' => 'Why — subtitle', 'ph.statsTitle' => 'Stats — title',
+            'ph.techTitle' => 'Tech — title', 'ph.techSub' => 'Tech — subtitle', 'ph.storiesTitle' => 'Stories — title',
+            'ph.supportTitle' => 'Support — title', 'ph.faqTitle' => 'FAQ — title',
+            'ph.finalTitle' => 'Final CTA — title', 'ph.finalSub' => 'Final CTA — subtitle',
+            'home.featured' => 'Featured — title', 'home.seeAll' => 'Featured — see-all',
+        ],
+    ];
+
+    public function content()
+    {
+        $textValues = [];
+        foreach (self::TEXT_GROUPS as $keys) {
+            foreach (array_keys($keys) as $key) {
+                $textValues[$key] = Translations::get($key);
+            }
+        }
+
+        return view('dashboard.admin.content', [
+            'content' => SiteContentController::effectiveContent(),
+            'textValues' => $textValues,
+            'groups' => self::TEXT_GROUPS,
+            'canManage' => auth()->user()->can('settings.manage'),
+        ]);
     }
 }
