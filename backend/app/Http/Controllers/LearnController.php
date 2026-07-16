@@ -78,6 +78,28 @@ class LearnController extends Controller
         ]);
     }
 
+    /** Printable completion certificate — only once the course is 100% done. */
+    public function certificate(Request $request, string $slug)
+    {
+        $user = $request->user();
+        $course = Course::where('slug', $slug)->with('teacher:id,name')->firstOrFail();
+        $enrollment = $course->enrollments()->where('user_id', $user->id)->first();
+
+        abort_unless($enrollment, 403, 'You are not enrolled in this course.');
+        abort_unless((int) $enrollment->progress >= 100, 403, 'Finish all lessons to earn your certificate.');
+
+        $completedAt = $enrollment->completed_at ?? $enrollment->updated_at;
+
+        return view('dashboard.certificate', [
+            'serial' => sprintf('NOVA-%s-%05d', $completedAt->format('Y'), $enrollment->id),
+            'studentName' => $user->name,
+            'courseTitle' => $course->title,
+            'instructorName' => optional($course->teacher)->name,
+            'completedDate' => $completedAt->format('F j, Y'),
+            'lessonsCount' => $course->lessons()->count(),
+        ]);
+    }
+
     /**
      * Complete the active lesson by answering its MCQ (if any). Returns JSON for
      * the Alpine front-end: { correct, next_lesson_id, progress }.

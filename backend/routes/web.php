@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/learn', [LearnController::class, 'index'])->name('learn');
     Route::get('/dashboard/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
     Route::post('/dashboard/courses/{course}/lessons/{lesson}/answer', [LearnController::class, 'answer'])->name('learn.answer');
+    Route::get('/dashboard/certificate/{slug}', [LearnController::class, 'certificate'])->name('certificate');
 
     // Teaching (instructors)
     Route::middleware('permission:courses.create')->group(function () {
