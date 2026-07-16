@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LearnController;
 use App\Http\Controllers\PublicController;
@@ -32,6 +33,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
  */
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'home'])->name('dashboard');
+
+    // Catalog + enrollment + purchases
+    Route::get('/dashboard/courses', [CatalogController::class, 'index'])->name('catalog');
+    Route::post('/dashboard/courses/{course}/enroll', [CatalogController::class, 'enroll'])->name('enroll');
+    Route::get('/dashboard/purchases', [CatalogController::class, 'purchases'])->name('purchases');
 
     // Student learning
     Route::get('/dashboard/learn', [LearnController::class, 'index'])->name('learn');
