@@ -116,9 +116,25 @@ class SiteContentController extends Controller
     public function show()
     {
         return response()->json([
-            'content' => $this->effective(),
+            'content' => self::effectiveContent(),
             'text' => Setting::get('text_overrides', (object) []),
         ]);
+    }
+
+    /** Defaults deep-merged with the saved override — usable from Blade/web too. */
+    public static function effectiveContent(): array
+    {
+        $saved = Setting::get('site_content');
+
+        return is_array($saved) ? self::deepMerge(self::DEFAULTS, $saved) : self::DEFAULTS;
+    }
+
+    /** Saved bilingual UI-text overrides (`{ key: {en,bn} }`). */
+    public static function textOverrides(): array
+    {
+        $t = Setting::get('text_overrides', []);
+
+        return is_array($t) ? $t : [];
     }
 
     /**
@@ -161,19 +177,11 @@ class SiteContentController extends Controller
         // Only keep known top-level sections; store the merged result so the
         // saved value is always a complete, valid content tree.
         $incoming = array_intersect_key($data['content'], self::DEFAULTS);
-        $merged = $this->deepMerge(self::DEFAULTS, $incoming);
+        $merged = self::deepMerge(self::DEFAULTS, $incoming);
 
         Setting::set('site_content', $merged, 'content', 'json');
 
         return response()->json(['content' => $merged]);
-    }
-
-    /** Defaults deep-merged with the saved override (if any). */
-    private function effective(): array
-    {
-        $saved = Setting::get('site_content');
-
-        return is_array($saved) ? $this->deepMerge(self::DEFAULTS, $saved) : self::DEFAULTS;
     }
 
     /**
@@ -181,14 +189,14 @@ class SiteContentController extends Controller
      * stats/stories rows) are replaced wholesale by the override, so deleting a
      * row actually deletes it rather than leaving the default behind.
      */
-    private function deepMerge(array $base, array $override): array
+    private static function deepMerge(array $base, array $override): array
     {
         foreach ($override as $key => $value) {
             if (
                 is_array($value) && isset($base[$key]) && is_array($base[$key])
-                && $this->isAssoc($value) && $this->isAssoc($base[$key])
+                && self::isAssoc($value) && self::isAssoc($base[$key])
             ) {
-                $base[$key] = $this->deepMerge($base[$key], $value);
+                $base[$key] = self::deepMerge($base[$key], $value);
             } else {
                 $base[$key] = $value;
             }
@@ -197,7 +205,7 @@ class SiteContentController extends Controller
         return $base;
     }
 
-    private function isAssoc(array $arr): bool
+    private static function isAssoc(array $arr): bool
     {
         if ($arr === []) {
             return false;

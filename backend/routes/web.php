@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
 /*
- * This is the API backend. It has no visual website of its own — the actual
- * LMS site is the Next.js frontend. If someone opens this server in a browser
- * by mistake, send them to the real website.
+ * Public marketing site — server-rendered Blade (replaces the Next.js frontend).
+ * Dashboard / auth pages are added in a later phase.
  */
-Route::get('/', function () {
-    return redirect()->away(env('FRONTEND_URL', 'http://localhost:3000'));
-});
+Route::get('/', [PublicController::class, 'home'])->name('home');
+Route::get('/about', [PublicController::class, 'about'])->name('about');
+Route::get('/pricing', [PublicController::class, 'pricing'])->name('pricing');
+Route::get('/instructors', [PublicController::class, 'instructors'])->name('instructors');
+Route::get('/contact', [PublicController::class, 'contact'])->name('contact');
+Route::get('/courses', [PublicController::class, 'courses'])->name('courses');
+Route::get('/courses/{slug}', [PublicController::class, 'courseShow'])->name('courses.show');
