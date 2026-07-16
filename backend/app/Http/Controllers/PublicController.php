@@ -63,12 +63,14 @@ class PublicController extends Controller
     public function courses()
     {
         $courses = Course::published()
-            ->with('teacher:id,name', 'category:id,name,color')
+            ->with('teacher:id,name', 'category:id,name,slug,color')
             ->withCount('lessons')
             ->latest()
             ->get();
 
-        return $this->page('public.courses', compact('courses'));
+        $categories = \App\Models\Category::orderBy('name')->get(['id', 'name', 'slug']);
+
+        return $this->page('public.courses', compact('courses', 'categories'));
     }
 
     public function courseShow(string $slug)
