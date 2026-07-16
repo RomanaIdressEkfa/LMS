@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LearnController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,13 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 /*
- * Dashboard (auth-only) — placeholder for now; full Blade dashboard is Phase 3.
+ * Dashboard (auth-only). Built out in Blade over phase 3.
  */
-Route::get('/dashboard', [DashboardController::class, 'home'])->middleware('auth')->name('dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'home'])->name('dashboard');
+
+    // Student learning
+    Route::get('/dashboard/learn', [LearnController::class, 'index'])->name('learn');
+    Route::get('/dashboard/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
+    Route::post('/dashboard/courses/{course}/lessons/{lesson}/answer', [LearnController::class, 'answer'])->name('learn.answer');
+});
