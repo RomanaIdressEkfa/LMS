@@ -4,7 +4,9 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LearnController;
+use App\Http\Controllers\LiveController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\QuizWebController;
 use App\Http\Controllers\TeachingController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +46,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/learn/{slug}', [LearnController::class, 'show'])->name('learn.show');
     Route::post('/dashboard/courses/{course}/lessons/{lesson}/answer', [LearnController::class, 'answer'])->name('learn.answer');
     Route::get('/dashboard/certificate/{slug}', [LearnController::class, 'certificate'])->name('certificate');
+
+    // Quizzes (students take; creators see their own)
+    Route::middleware('permission:quizzes.view')->group(function () {
+        Route::get('/dashboard/quizzes', [QuizWebController::class, 'index'])->name('quizzes');
+        Route::get('/dashboard/quizzes/{quiz}/take', [QuizWebController::class, 'take'])->name('quizzes.take');
+        Route::post('/dashboard/quizzes/{quiz}/submit', [QuizWebController::class, 'submit'])->name('quizzes.submit');
+    });
+
+    // Live classes
+    Route::get('/dashboard/live', [LiveController::class, 'index'])->middleware('permission:live.view')->name('live');
 
     // Teaching (instructors)
     Route::middleware('permission:courses.create')->group(function () {
