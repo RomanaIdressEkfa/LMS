@@ -55,6 +55,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/dashboard/quizzes/{quiz}/submit', [QuizWebController::class, 'submit'])->name('quizzes.submit');
     });
 
+    // Quiz authoring (creators build their own quizzes)
+    Route::middleware('permission:quizzes.create')->group(function () {
+        Route::post('/dashboard/quizzes', [QuizWebController::class, 'store'])->name('quizzes.store');
+        Route::get('/dashboard/quizzes/{quiz}/edit', [QuizWebController::class, 'edit'])->name('quizzes.edit');
+        Route::put('/dashboard/quizzes/{quiz}', [QuizWebController::class, 'update'])->name('quizzes.update');
+        Route::post('/dashboard/quizzes/{quiz}/publish', [QuizWebController::class, 'togglePublish'])->name('quizzes.publish');
+        Route::delete('/dashboard/quizzes/{quiz}', [QuizWebController::class, 'destroy'])->name('quizzes.destroy');
+        Route::post('/dashboard/quizzes/{quiz}/questions', [QuizWebController::class, 'storeQuestion'])->name('quizzes.questions.store');
+        Route::put('/dashboard/quizzes/{quiz}/questions/{question}', [QuizWebController::class, 'updateQuestion'])->name('quizzes.questions.update');
+        Route::delete('/dashboard/quizzes/{quiz}/questions/{question}', [QuizWebController::class, 'destroyQuestion'])->name('quizzes.questions.destroy');
+    });
+
     // Live classes
     Route::get('/dashboard/live', [LiveController::class, 'index'])->middleware('permission:live.view')->name('live');
 
