@@ -67,8 +67,14 @@ Route::middleware('auth')->group(function () {
         Route::delete('/dashboard/quizzes/{quiz}/questions/{question}', [QuizWebController::class, 'destroyQuestion'])->name('quizzes.questions.destroy');
     });
 
-    // Live classes
+    // Live classes (everyone views; hosts schedule/manage their own)
     Route::get('/dashboard/live', [LiveController::class, 'index'])->middleware('permission:live.view')->name('live');
+    Route::middleware('permission:live.host')->group(function () {
+        Route::post('/dashboard/live', [LiveController::class, 'store'])->name('live.store');
+        Route::put('/dashboard/live/{live}', [LiveController::class, 'update'])->name('live.update');
+        Route::post('/dashboard/live/{live}/status', [LiveController::class, 'setStatus'])->name('live.status');
+        Route::delete('/dashboard/live/{live}', [LiveController::class, 'destroy'])->name('live.destroy');
+    });
 
     // Admin
     Route::middleware('permission:modules.view')->group(function () {
