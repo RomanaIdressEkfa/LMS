@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 
@@ -12,8 +11,9 @@ use Illuminate\Http\Request;
  * deep-merged over the DEFAULTS below, so an admin only needs to override the
  * bits they want to change and everything else keeps its shipped value.
  *
- *  GET  /api/content   — public; returns the effective (merged) content.
- *  PUT  /api/content   — settings.manage; saves overrides.
+ * The static effectiveContent()/textOverrides() helpers are consumed directly
+ * by PublicController, AdminController and Translations (no HTTP round-trip);
+ * update()/saveText() back the dashboard content editor's PUT web routes.
  */
 class SiteContentController extends Controller
 {
@@ -111,15 +111,6 @@ class SiteContentController extends Controller
             'tagline' => ['en' => 'Create, sell and teach courses. Grow your online academy — all in one bold platform.', 'bn' => 'কোর্স তৈরি, বিক্রি ও শেখান। আপনার অনলাইন একাডেমি গড়ে তুলুন — সব এক সাহসী প্ল্যাটফর্মে।'],
         ],
     ];
-
-    /** Public: the effective content + any saved bilingual text overrides. */
-    public function show()
-    {
-        return response()->json([
-            'content' => self::effectiveContent(),
-            'text' => Setting::get('text_overrides', (object) []),
-        ]);
-    }
 
     /** Defaults deep-merged with the saved override — usable from Blade/web too. */
     public static function effectiveContent(): array

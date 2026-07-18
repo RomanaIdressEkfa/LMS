@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Api\SettingsController;
-use App\Http\Controllers\Api\SiteContentController;
 use App\Models\Module;
 use App\Models\PaymentGateway;
 use App\Models\Plan;
@@ -121,11 +119,41 @@ class AdminController extends Controller
     }
 
     /* ---------------- Settings ---------------- */
+
+    /** The editable site settings, with their groups + value types. */
+    public const SETTINGS_SCHEMA = [
+        ['key' => 'site_name', 'label' => 'Site name', 'group' => 'general', 'type' => 'string'],
+        ['key' => 'site_tagline', 'label' => 'Tagline', 'group' => 'general', 'type' => 'string'],
+        ['key' => 'default_language', 'label' => 'Default language (en or bn)', 'group' => 'general', 'type' => 'string'],
+        ['key' => 'default_currency', 'label' => 'Default currency', 'group' => 'general', 'type' => 'string'],
+        ['key' => 'support_email', 'label' => 'Support email', 'group' => 'general', 'type' => 'string'],
+        ['key' => 'allow_registration', 'label' => 'Allow public registration', 'group' => 'auth', 'type' => 'bool'],
+        ['key' => 'require_course_approval', 'label' => 'Require admin approval to publish courses', 'group' => 'courses', 'type' => 'bool'],
+
+        // ---- Appearance (super-admin theming) ----
+        ['key' => 'primary_color', 'label' => 'Primary brand color', 'group' => 'appearance', 'type' => 'color'],
+        ['key' => 'home_show_stats', 'label' => 'Homepage: show success-stats band', 'group' => 'appearance', 'type' => 'bool'],
+        ['key' => 'home_show_tech', 'label' => 'Homepage: show technology grid', 'group' => 'appearance', 'type' => 'bool'],
+        ['key' => 'home_show_stories', 'label' => 'Homepage: show success stories', 'group' => 'appearance', 'type' => 'bool'],
+        ['key' => 'home_show_support', 'label' => 'Homepage: show support section', 'group' => 'appearance', 'type' => 'bool'],
+        ['key' => 'home_show_faq', 'label' => 'Homepage: show FAQ', 'group' => 'appearance', 'type' => 'bool'],
+    ];
+
+    /** Sensible defaults per key (used when nothing is saved yet). */
+    public const SETTINGS_DEFAULTS = [
+        'primary_color' => '#2563ff',
+        'home_show_stats' => true,
+        'home_show_tech' => true,
+        'home_show_stories' => true,
+        'home_show_support' => true,
+        'home_show_faq' => true,
+    ];
+
     public function settings()
     {
-        $settings = collect(SettingsController::SCHEMA)
+        $settings = collect(self::SETTINGS_SCHEMA)
             ->map(fn ($s) => array_merge($s, [
-                'value' => Setting::get($s['key'], SettingsController::DEFAULTS[$s['key']] ?? ($s['type'] === 'bool' ? false : '')),
+                'value' => Setting::get($s['key'], self::SETTINGS_DEFAULTS[$s['key']] ?? ($s['type'] === 'bool' ? false : '')),
             ]))
             ->groupBy('group');
 
@@ -139,7 +167,7 @@ class AdminController extends Controller
     {
         abort_unless($request->user()->can('settings.manage'), 403);
 
-        foreach (SettingsController::SCHEMA as $s) {
+        foreach (self::SETTINGS_SCHEMA as $s) {
             $key = $s['key'];
             $value = $s['type'] === 'bool'
                 ? $request->boolean("settings.$key")

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Api\SiteContentController;
+use App\Http\Controllers\SiteContentController;
 use App\Models\Course;
 use App\Models\Plan;
 use App\Models\User;

@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Http\Controllers\Api\SiteContentController;
+use App\Http\Controllers\SiteContentController;
 
 /**
  * Resolves a bilingual UI string ({en, bn}) for a dictionary key, applying any

@@ -93,8 +93,8 @@ Route::middleware('auth')->group(function () {
     // Site content editor (view needs settings.view; saving needs settings.manage)
     Route::get('/dashboard/content', [AdminController::class, 'content'])->middleware('permission:settings.view')->name('content');
     Route::middleware('permission:settings.manage')->group(function () {
-        Route::put('/dashboard/content', [\App\Http\Controllers\Api\SiteContentController::class, 'update']);
-        Route::put('/dashboard/content/text', [\App\Http\Controllers\Api\SiteContentController::class, 'saveText']);
+        Route::put('/dashboard/content', [\App\Http\Controllers\SiteContentController::class, 'update']);
+        Route::put('/dashboard/content/text', [\App\Http\Controllers\SiteContentController::class, 'saveText']);
     });
     // Settings + Roles
     Route::middleware('permission:settings.view')->group(function () {
