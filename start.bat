@@ -1,26 +1,23 @@
 @echo off
 REM ============================================================
-REM  LMS - one-click local start
-REM  Forces the CORRECT PHP 8.2 and Node 25 (your Laragon
-REM  terminal defaults to old PHP 8.1 / Node 16 which won't work).
+REM  Nova LMS - one-click local start (single Laravel app)
+REM  Forces the correct PHP 8.3 (Laragon's terminal may default
+REM  to an older PHP that won't run Laravel 12).
 REM ============================================================
 
-set "PHP_DIR=C:\laragon\bin\php\php-8.2.29-Win32-vs16-x64"
-set "NODE_DIR=C:\Program Files\nodejs"
+set "PHP_DIR=C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64"
 
-echo Starting LMS with the correct versions...
+echo Starting Nova LMS...
 echo   PHP  : %PHP_DIR%
-echo   NODE : %NODE_DIR%
+echo   SITE -^> http://localhost:8000
 echo.
-echo   API      -^> http://127.0.0.1:8000   (backend engine)
-echo   WEBSITE  -^> http://localhost:3000    (THIS is your site)
+echo   (Use localhost, NOT 127.0.0.1 - session cookies are scoped to it.)
 echo.
 
-start "LMS API (Laravel)"    cmd /k "set "PATH=%PHP_DIR%;%PATH%" && cd /d %~dp0backend && php artisan serve --host=127.0.0.1 --port=8000"
-start "LMS Website (Next.js)" cmd /k "set "PATH=%NODE_DIR%;%PATH%" && cd /d %~dp0frontend && npm run dev"
+start "Nova LMS (Laravel)" cmd /k "set "PATH=%PHP_DIR%;%PATH%" && cd /d %~dp0 && php artisan serve --host=127.0.0.1 --port=8000"
 
-echo Two windows opened. Wait ~10 seconds, then open:
+echo Server window opened. Wait a few seconds, then open:
 echo.
-echo     http://localhost:3000
+echo     http://localhost:8000
 echo.
 pause

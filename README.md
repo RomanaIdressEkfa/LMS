@@ -1,28 +1,27 @@
 # Nova LMS
 
-A modern Learning Management System — **Laravel 12 API** + **Next.js 16 frontend**,
-with a custom Roles & Permissions engine, a toggleable Addon/Module system, and
-toggleable payment gateways.
+A modern Learning Management System — a **single Laravel 12 app** with a
+server-rendered **Blade + Tailwind + Alpine.js** UI, a custom Roles & Permissions
+engine, a toggleable Addon/Module system, and toggleable payment gateways.
+(It began as a Laravel API + Next.js frontend; the frontend was migrated into
+Blade so it runs on plain PHP hosting with no Node at runtime.)
 
 ## Stack
-- **backend/** — Laravel 12, MySQL, Sanctum tokens, spatie/laravel-permission
-- **frontend/** — Next.js 16 (App Router, TypeScript, Tailwind v4), Sora bold font
+- **Laravel 12**, MySQL, spatie/laravel-permission, session-based web auth
+- **Blade + Tailwind v4 + Alpine.js**, built with Vite (assets → `public/build`)
 
-## Run it (two terminals)
+The repo root **is** the Laravel app (no more `backend/` subfolder).
 
-**1. Backend API** (http://127.0.0.1:8000)
+## Run it (one terminal)
+
 ```bash
-cd backend
 php artisan serve --host=127.0.0.1 --port=8000
 ```
 
-**2. Frontend** (http://localhost:3000)
-```bash
-cd frontend
-npm run dev
-```
+Then open **http://localhost:8000** and log in. Use the `localhost` host, not
+`127.0.0.1` — session cookies are scoped to `SESSION_DOMAIN=localhost`.
 
-Then open http://localhost:3000 and log in.
+Building assets after a UI change: `npm run dev` (watch) or `npm run build`.
 
 ## Demo accounts (password: `password`)
 | Role        | Email                   | Sees |
@@ -34,7 +33,6 @@ Then open http://localhost:3000 and log in.
 
 ## Reset / reseed the database
 ```bash
-cd backend
 php artisan migrate:fresh --seed
 ```
 
@@ -96,6 +94,8 @@ Slugs are auto-generated from titles via Laravel `Str::slug`, so
 using the `slug` returned by the API, never a hand-built one.
 
 ## Notes
-- Brand name lives in `frontend/src/lib/brand.ts` — change it in one place.
-- The Coca-Cola "TCCC-Unity" font is proprietary and cannot be shipped; Nova LMS
-  uses **Sora** (free, heavy) for the bold look.
+- The UI is server-rendered Blade under `resources/views`; interactivity is
+  Alpine.js, and forms POST to CSRF-protected web routes (`routes/web.php`).
+  There is no separate JSON API or Node runtime.
+- Bilingual (en/bn) text is toggled client-side via a persisted Alpine store;
+  the UI dictionary lives in `lang/dict.php` with admin overrides.
